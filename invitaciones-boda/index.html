@@ -57,6 +57,13 @@ canvas{max-width:100%;max-height:78vh;height:auto;box-shadow:0 10px 30px rgba(0,
 .toast.show{opacity:1}
 .check{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--muted)}
 .check input{width:auto}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 10px;border-radius:999px;font-size:13px}
+.chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.refrow{display:flex;gap:12px;align-items:center;margin-top:10px}
+.thumb{width:84px;height:84px;object-fit:cover;border-radius:8px;border:1px solid var(--line);flex:none}
+.pal{display:flex;gap:6px;flex-wrap:wrap}
+.pal span{width:28px;height:28px;border-radius:6px;border:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -122,8 +129,43 @@ canvas{max-width:100%;max-height:78vh;height:auto;box-shadow:0 10px 30px rgba(0,
       <div><label for="c1">Color principal</label><input id="c1" type="color"></div>
       <div><label for="c2">Color de acento</label><input id="c2" type="color"></div>
     </div>
-    <label for="extra">Detalles extra para el prompt (opcional)</label>
-    <input id="extra" placeholder="ej. acuarela suave, luz dorada de atardecer">
+    <h2>Foto de ejemplo (inspiración)</h2>
+    <div class="hint" style="margin-top:0">Sube una invitación, decoración o imagen que te guste. La app toma sus colores y su ambiente y los pone en el prompt.</div>
+    <input id="refFile" type="file" accept="image/*" style="margin-top:8px">
+    <div id="refBox" hidden>
+      <div class="refrow">
+        <img id="refThumb" class="thumb" alt="Foto de ejemplo">
+        <div style="min-width:0">
+          <div class="pal" id="refPal"></div>
+          <div class="hint" id="refMood"></div>
+        </div>
+      </div>
+      <div class="btns">
+        <button class="primary" id="refApply">Usar estos colores</button>
+        <button id="refClear">Quitar foto</button>
+      </div>
+      <label class="check"><input type="checkbox" id="refUse" checked> Pedir a la IA que imite el estilo de esta foto</label>
+    </div>
+
+    <h2>Foto de los novios</h2>
+    <input id="coupleFile" type="file" accept="image/*">
+    <div class="row">
+      <div>
+        <label for="frame">Marco de la foto</label>
+        <select id="frame">
+          <option value="circulo">Círculo</option>
+          <option value="arco">Arco</option>
+          <option value="rect">Rectángulo</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:flex-end"><button id="coupleClear" style="width:100%">Quitar foto</button></div>
+    </div>
+
+    <h2>Lo que quieres</h2>
+    <label for="extra">Describe con tus palabras lo que quieres</label>
+    <textarea id="extra" placeholder="ej. flores blancas con hojas verdes, estilo acuarela, luz dorada de atardecer"></textarea>
+    <label>Ajustes rápidos (puedes marcar varios)</label>
+    <div class="chips" id="chips"></div>
 
     <h2>Fondo generado por IA</h2>
     <input id="bgfile" type="file" accept="image/*">
@@ -152,6 +194,7 @@ canvas{max-width:100%;max-height:78vh;height:auto;box-shadow:0 10px 30px rgba(0,
 
     <div class="panel">
       <h2>Prompt de gráficos</h2>
+      <div class="btns" style="margin:0 0 10px"><button id="variar">🔄 Otra variación</button><span class="hint" id="varInfo" style="align-self:center;margin:0"></span></div>
       <div class="tabs" id="tabs">
         <button data-t="midjourney" class="on">Midjourney</button>
         <button data-t="sd">Stable Diffusion</button>
@@ -161,6 +204,7 @@ canvas{max-width:100%;max-height:78vh;height:auto;box-shadow:0 10px 30px rgba(0,
       <div class="prompt-box">
         <label>Prompt</label>
         <pre id="pPos"></pre>
+        <div class="hint" id="pNote" hidden></div>
         <div class="btns"><button class="primary" data-copy="pPos">Copiar prompt</button></div>
       </div>
       <div class="prompt-box" id="negWrap">
@@ -209,9 +253,31 @@ const FORMATS = {
 
 // ---------- Estado ----------
 const $ = id => document.getElementById(id);
-const FIELDS = ["n1","n2","intro","fecha","hora","ceremonia","recepcion","dress","rsvp","mensaje","motivo","formato","c1","c2","extra"];
-let state = {theme:"clasico"};
-let bgImg = null, tab = "midjourney";
+const FIELDS = ["n1","n2","intro","fecha","hora","ceremonia","recepcion","dress","rsvp","mensaje","motivo","formato","c1","c2","extra","frame"];
+let state = {theme:"clasico", chips:[], variant:0};
+let bgImg = null, coupleImg = null, refInfo = null, tab = "midjourney";
+
+// Ajustes rápidos: [etiqueta, inglés, español]
+const CHIPS = {
+  elegante:["Más elegante","more elegant and luxurious, refined details","más elegante y lujoso, detalles refinados"],
+  colorido:["Más colorido","vibrant rich colors","colores vivos e intensos"],
+  pastel:["Más suave","soft pastel tones, delicate","tonos pastel suaves y delicados"],
+  flores:["Más flores","abundant lush flowers","abundantes flores frondosas"],
+  minimal:["Menos adornos","fewer decorations, more negative space","menos adornos, más espacio libre"],
+  luz:["Más luminoso","bright airy light","luz brillante y aireada"],
+  acuarela:["Acuarela","hand-painted watercolor illustration","ilustración pintada a mano en acuarela"],
+  realista:["Fotorrealista","photorealistic, real paper and real flowers photographed","fotorrealista, papel y flores reales fotografiados"],
+  dorado:["Detalles dorados","gold foil accents","detalles en foil dorado"],
+  vintage:["Vintage","vintage antique style, aged paper","estilo vintage antiguo, papel envejecido"]
+};
+// Variaciones: luz y composición distintas para obtener otra propuesta
+const VARIANTS = [
+  ["soft natural daylight, symmetrical composition","luz natural suave, composición simétrica"],
+  ["warm golden hour glow, asymmetrical corner composition","luz cálida de atardecer, composición asimétrica en las esquinas"],
+  ["studio lighting with gentle shadows, frame border composition","luz de estudio con sombras suaves, composición tipo marco"],
+  ["dreamy diffused light, top and bottom border composition","luz difusa de ensueño, decoración arriba y abajo"],
+  ["elegant moody light, wreath around the center","luz elegante y suave, corona alrededor del centro"]
+];
 
 function buildThemeButtons(){
   const box = $("themes");
@@ -224,7 +290,45 @@ function buildThemeButtons(){
   }
 }
 function readForm(){ for (const f of FIELDS) state[f] = $(f).value; state.veil = $("veil").checked; }
-function writeForm(s){ for (const f of FIELDS) if (s[f] !== undefined) $(f).value = s[f]; if (s.veil !== undefined) $("veil").checked = s.veil; state = {...state, ...s}; }
+function writeForm(s){ for (const f of FIELDS) if (s[f] !== undefined) $(f).value = s[f]; if (s.veil !== undefined) $("veil").checked = s.veil; state = {...state, ...s}; if (!Array.isArray(state.chips)) state.chips = []; }
+
+// ---------- Foto de ejemplo: colores y ambiente ----------
+function analyzeImage(img){
+  const c = document.createElement("canvas"), n = 72; c.width = c.height = n;
+  const x = c.getContext("2d"); x.drawImage(img,0,0,n,n);
+  const d = x.getImageData(0,0,n,n).data, buckets = new Map();
+  let lum = 0, sat = 0, cnt = 0;
+  for (let i=0;i<d.length;i+=4){
+    if (d[i+3] < 128) continue;
+    const r=d[i], g=d[i+1], b=d[i+2], mx=Math.max(r,g,b), mn=Math.min(r,g,b);
+    lum += (r*299+g*587+b*114)/1000; sat += mx ? (mx-mn)/mx : 0; cnt++;
+    const key = (r>>4)<<8 | (g>>4)<<4 | (b>>4);
+    const e = buckets.get(key) || {r:0,g:0,b:0,n:0}; e.r+=r; e.g+=g; e.b+=b; e.n++; buckets.set(key,e);
+  }
+  const all = [...buckets.values()].sort((a,b)=>b.n-a.n).map(e=>[e.r/e.n,e.g/e.n,e.b/e.n]);
+  const pal = [];
+  for (const c of all){ if (pal.every(p => Math.hypot(p[0]-c[0],p[1]-c[1],p[2]-c[2]) > 48)) pal.push(c); if (pal.length===5) break; }
+  const hex = pal.map(c => "#"+c.map(v=>Math.round(v).toString(16).padStart(2,"0")).join(""));
+  lum /= cnt; sat /= cnt;
+  const mood = [
+    lum > 185 ? ["light and airy","claro y aireado"] : lum < 90 ? ["dark and dramatic","oscuro y dramático"] : ["balanced tones","tonos equilibrados"],
+    sat < .18 ? ["muted neutral palette","paleta neutra y apagada"] : sat > .5 ? ["vibrant saturated colors","colores vivos y saturados"] : ["soft natural colors","colores naturales suaves"]
+  ];
+  return {hex, mood};
+}
+// Elige principal (el más oscuro con algo de color) y acento (el más saturado distinto)
+function pickColors(hex){
+  const info = hex.map(h => { const [r,g,b]=hexToRgb(h), mx=Math.max(r,g,b), mn=Math.min(r,g,b); return {h, l:(r*299+g*587+b*114)/1000, s: mx?(mx-mn)/mx:0}; });
+  const main = [...info].filter(i=>i.l<170).sort((a,b)=>a.l-b.l)[0] || [...info].sort((a,b)=>a.l-b.l)[0];
+  const acc = [...info].filter(i=>i.h!==main.h).sort((a,b)=>b.s-a.s)[0] || main;
+  return [main.h, acc.h];
+}
+function showRef(){
+  $("refBox").hidden = !refInfo;
+  if (!refInfo) return;
+  $("refPal").innerHTML = refInfo.hex.map(h=>`<span style="background:${h}" title="${h}"></span>`).join("");
+  $("refMood").textContent = "Ambiente: " + refInfo.mood.map(m=>m[1]).join(", ");
+}
 
 // ---------- Utilidades ----------
 function fmtFecha(v){
@@ -370,6 +474,19 @@ function accent(ctx,x,y,u,t,motif,c1,c2){
 // Margen seguro (arriba/abajo) que deja cada estilo libre para el texto
 const SAFE = {clasico:.13, floral:.2, rustico:.19, minimal:.17, playa:.2, deco:.25};
 
+// Foto de los novios recortada en círculo, arco o rectángulo
+function drawPhoto(ctx, img, cx, cy, s, frame, col, u){
+  const w = frame==="circulo" ? s : s*.8, h = s, x = cx-w/2, y = cy-h/2;
+  const path = () => { ctx.beginPath();
+    if (frame==="circulo") ctx.arc(cx,cy,s/2,0,Math.PI*2);
+    else if (frame==="arco"){ ctx.moveTo(x,y+h); ctx.lineTo(x,y+w/2); ctx.arc(cx,y+w/2,w/2,Math.PI,0); ctx.lineTo(x+w,y+h); ctx.closePath(); }
+    else ctx.rect(x,y,w,h); };
+  ctx.save(); path(); ctx.clip();
+  const sc = Math.max(w/img.width, h/img.height), iw = img.width*sc, ih = img.height*sc;
+  ctx.drawImage(img, cx-iw/2, cy-ih/2, iw, ih); ctx.restore();
+  ctx.save(); path(); ctx.strokeStyle = col; ctx.lineWidth = u*.006; ctx.stroke(); ctx.restore();
+}
+
 // ---------- Render ----------
 function render(){
   const cv = $("cv"), ctx = cv.getContext("2d");
@@ -391,6 +508,7 @@ function render(){
 
   // Bloques de texto: [texto, estilo, familia, tamaño relativo, color, interlineado, espacio antes]
   const S = T.serif, SC = T.script, B = [];
+  if (coupleImg) B.push({photo:true, h: state.formato==="cuadrado" ? .2 : .26, after:.035});
   const add = (txt, style, fam, size, color, gap, before=0) => { if (txt) B.push({txt, style, fam, size, color, gap, before}); };
   add((state.intro||"").toUpperCase(), "400", S, .026, soft, 1.55);
   add(state.n1, "", SC, .14, ink, 1.05, .035);
@@ -405,7 +523,7 @@ function render(){
   add(state.mensaje, "", SC, .055, ink, 1.15, .035);
   add(state.rsvp, "400", S, .023, soft, 1.4, .02);
 
-  const accentH = hasAccent(state.theme, state.motivo) && !bgImg ? u*.09 : 0;
+  const accentH = hasAccent(state.theme, state.motivo) && !bgImg && !coupleImg ? u*.09 : 0;
   const top = (bgImg ? H*.13 : u*SAFE[state.theme]) + (state.theme==="minimal" ? W*.12 : 0) + accentH;
   const avail = H - top - (bgImg ? H*.13 : u*SAFE[state.theme]);
   const maxW = W * ({minimal:.62, floral:.62, playa:.62}[state.theme] || .7);
@@ -416,6 +534,7 @@ function render(){
     for (const b of B){
       h += (b.before||0) * u * sc;
       if (b.sep){ out.push({sep:true, y:h + b.h*u*sc/2}); h += b.h*u*sc; continue; }
+      if (b.photo){ const ph=b.h*u*sc; out.push({photo:true, y:h+ph/2, s:ph}); h += ph + b.after*u*sc; continue; }
       const px = b.size * u * sc; ctx.font = `${b.style} ${px}px "${b.fam}"`;
       for (const l of wrap(ctx, b.txt, maxW)){ out.push({l, font:ctx.font, color:b.color, y:h + px*b.gap/2}); h += px*b.gap; }
     }
@@ -425,10 +544,11 @@ function render(){
   for (let i=0; i<4 && Math.abs(L.h-avail) > 2; i++){ sc = Math.min(sc*avail/L.h, 1.25); L = layout(sc); if (sc >= 1.25) break; }
 
   const y0 = top + Math.max(0, (avail - L.h)/2);
-  if (!bgImg) accent(ctx, W/2, y0 - accentH*.55, u, state.theme, state.motivo, c1, c2);
+  if (!bgImg && !coupleImg) accent(ctx, W/2, y0 - accentH*.55, u, state.theme, state.motivo, c1, c2);
   ctx.textAlign = "center"; ctx.textBaseline = "middle";
   for (const o of L.out){
     const y = y0 + o.y;
+    if (o.photo){ drawPhoto(ctx, coupleImg, W/2, y, o.s, state.frame, c2, u); continue; }
     if (o.sep){
       ctx.strokeStyle = c2; ctx.lineWidth = u*.002; ctx.beginPath(); ctx.moveTo(W/2-u*.12,y); ctx.lineTo(W/2+u*.12,y); ctx.stroke();
       ctx.fillStyle = c2; ctx.save(); ctx.translate(W/2,y); ctx.rotate(Math.PI/4); ctx.fillRect(-u*.008,-u*.008,u*.016,u*.016); ctx.restore();
@@ -440,24 +560,54 @@ function render(){
 function prompts(){
   const T = THEMES[state.theme], F = FORMATS[state.formato], M = MOTIFS[state.motivo];
   const col1 = colorName(state.c1 || T.c1), col2 = colorName(state.c2 || T.c2);
-  const extra = (state.extra||"").trim();
-  const enCore = `${T.en}, featuring ${M[0]}, color palette of ${col1[0]} and ${col2[0]} on ${isDark(T.paper)?"black":"ivory"} paper, `+
-    `${F.en}, decorative elements only around the edges, large empty blank center area reserved for text, flat lay, top view, `+
-    `high detail, print quality, 300 dpi, professional graphic design${extra?", "+extra:""}`;
+  const extra = (state.extra||"").trim().replace(/\s+/g," ");
+  const chips = (state.chips||[]).filter(k=>CHIPS[k]);
+  const V = VARIANTS[(state.variant||0) % VARIANTS.length];
+  const ref = refInfo && $("refUse").checked ? refInfo : null;
+  const minimal = chips.includes("minimal");
+  const en = [
+    T.en, `featuring ${M[0]}`,
+    `color palette of ${col1[0]} and ${col2[0]} on ${isDark(T.paper)?"black":"ivory"} paper`,
+    ...chips.map(k=>CHIPS[k][1]),
+    ...(ref ? [`matching the style, colors and mood of the reference image (${ref.mood.map(m=>m[0]).join(", ")})`] : []),
+    V[0], F.en,
+    minimal ? "very large empty center for text" : "decorative elements only around the edges, large empty blank center area reserved for text",
+    "flat lay, top view, high detail, print quality, 300 dpi, professional graphic design",
+    ...(extra ? [extra] : [])
+  ].join(", ");
+  const es = [
+    `Fondo para ${T.es}`, `con ${M[1]}`, `paleta de colores ${col1[1]} y ${col2[1]}`,
+    ...chips.map(k=>CHIPS[k][2]),
+    ...(ref ? [`con el mismo estilo, colores y ambiente de la foto de ejemplo (${ref.mood.map(m=>m[1]).join(", ")})`] : []),
+    V[1], F.es,
+    "decoración solo en los bordes, gran espacio vacío en el centro para el texto, vista cenital, alta resolución, calidad de impresión, sin texto ni letras",
+    ...(extra ? [extra] : [])
+  ].join(", ") + ".";
   const neg = "text, letters, words, typography, writing, numbers, watermark, signature, logo, people, faces, blurry, low quality, jpeg artifacts, distorted, cluttered center";
+  const extraNote = extra && /[áéíóúñ¿¡]|\b(con|de|y|flores|estilo)\b/i.test(extra) ? "💡 Tu descripción está en español: la mayoría de IAs la entienden, pero en inglés suele dar mejores resultados." : "";
   switch(tab){
-    case "midjourney": return {pos:`${enCore}, no text --ar ${F.ar} --style raw --v 7 --no ${neg.split(", ").slice(0,8).join(", ")}`, neg:null};
-    case "sd": return {pos:`${enCore}, masterpiece, best quality\n\nTamaño sugerido: ${F.sd} · Steps 30 · CFG 6-7`, neg};
-    case "dalle": return {pos:`Create a ${F.dalle} background design for a wedding invitation. Style: ${T.en}. Include ${M[0]}. `+
-       `Use a color palette of ${col1[0]} and ${col2[0]}. Keep all decoration around the borders and leave a large, clean, empty space in the center for text that I will add later. `+
-       `Do NOT include any text, letters or numbers anywhere in the image.${extra?" Extra details: "+extra+".":""}`, neg:null};
-    case "es": return {pos:`Fondo para ${T.es}, con ${M[1]}, paleta de colores ${col1[1]} y ${col2[1]}, ${F.es}, `+
-       `decoración solo en los bordes, gran espacio vacío en el centro para el texto, vista cenital, alta resolución, calidad de impresión, sin texto ni letras${extra?", "+extra:""}.`,
+    case "midjourney": {
+      const sref = ref ? " --sref URL_DE_TU_FOTO" : "";
+      const how = ref ? "📎 Foto de ejemplo: súbela a Midjourney, copia su enlace y reemplaza URL_DE_TU_FOTO." : "";
+      return {pos:`${en}, no text --ar ${F.ar} --style raw --v 7${sref} --no ${neg.split(", ").slice(0,8).join(", ")}`, neg:null, note:[how, extraNote]};
+    }
+    case "sd": {
+      const how = ref ? "📎 Foto de ejemplo: úsala en img2img (denoising 0.5–0.65) o con IP-Adapter para copiar su estilo." : "";
+      return {pos:`${en}, masterpiece, best quality`, neg, note:[`⚙️ Tamaño sugerido: ${F.sd} · Steps 30 · CFG 6-7`, how, extraNote]};
+    }
+    case "dalle": return {pos:(ref ? "I attached a reference image: match its color palette, mood and decorative style as closely as possible. " : "")+
+       `Create a ${F.dalle} background design for a wedding invitation. Style: ${T.en}. Include ${M[0]}. `+
+       `Use a color palette of ${col1[0]} and ${col2[0]}. `+(chips.length ? `Make it ${chips.map(k=>CHIPS[k][1]).join(", ")}. ` : "")+
+       `Lighting and composition: ${V[0]}. Keep all decoration around the borders and leave a large, clean, empty space in the center for text that I will add later. `+
+       `Do NOT include any text, letters or numbers anywhere in the image.${extra?" What I want: "+extra+".":""}`+
+       "", neg:null, note:[ref ? "📎 Adjunta tu foto de ejemplo en el chat junto con este prompt." : "", extraNote]};
+    case "es": return {pos: (ref ? "Usa la foto adjunta como referencia de estilo y colores. " : "") + es,
        neg:"texto, letras, palabras, números, marca de agua, logotipos, personas, borroso, baja calidad, distorsionado"};
   }
 }
 function renderPrompts(){
   const p = prompts(); $("pPos").textContent = p.pos;
+  const notes = (p.note||[]).filter(Boolean); $("pNote").hidden = !notes.length; $("pNote").innerHTML = notes.map(n=>`<div>${n}</div>`).join("");
   $("negWrap").style.display = p.neg ? "" : "none"; $("pNeg").textContent = p.neg || "";
 }
 
@@ -465,6 +615,8 @@ function renderPrompts(){
 function sync(){
   readForm();
   document.querySelectorAll(".theme").forEach(el => el.classList.toggle("on", el.dataset.k === state.theme));
+  document.querySelectorAll(".chip").forEach(el => el.classList.toggle("on", state.chips.includes(el.dataset.k)));
+  $("varInfo").textContent = `Variación ${(state.variant||0)+1} de ${VARIANTS.length}`;
   render(); renderPrompts();
   try { localStorage.setItem("invitacion-boda", JSON.stringify(state)); } catch(e){}
 }
@@ -476,7 +628,20 @@ buildThemeButtons();
 $("c1").value = THEMES.clasico.c1; $("c2").value = THEMES.clasico.c2;
 try { const saved = JSON.parse(localStorage.getItem("invitacion-boda")||"null"); if (saved) writeForm(saved); } catch(e){}
 
-FIELDS.concat("veil").forEach(f => $(f).addEventListener("input", sync));
+FIELDS.concat("veil","refUse").forEach(f => $(f).addEventListener("input", sync));
+// Ajustes rápidos
+for (const [k,c] of Object.entries(CHIPS)){
+  const b = document.createElement("button"); b.className = "chip"; b.dataset.k = k; b.textContent = c[0];
+  b.onclick = () => { const on = state.chips.includes(k); state.chips = on ? state.chips.filter(x=>x!==k) : [...state.chips, k]; sync(); };
+  $("chips").appendChild(b);
+}
+$("variar").onclick = () => { state.variant = ((state.variant||0) + 1) % VARIANTS.length; sync(); toast("Nueva variación del prompt"); };
+const loadImg = (file, cb) => { if (!file) return; const img = new Image(); img.onload = () => cb(img); img.src = URL.createObjectURL(file); };
+$("refFile").onchange = e => loadImg(e.target.files[0], img => { refInfo = analyzeImage(img); $("refThumb").src = img.src; showRef(); sync(); });
+$("refApply").onclick = () => { if (!refInfo) return; const [a,b] = pickColors(refInfo.hex); $("c1").value = a; $("c2").value = b; sync(); toast("Colores aplicados"); };
+$("refClear").onclick = () => { refInfo = null; $("refFile").value = ""; showRef(); sync(); };
+$("coupleFile").onchange = e => loadImg(e.target.files[0], img => { coupleImg = img; render(); });
+$("coupleClear").onclick = () => { coupleImg = null; $("coupleFile").value = ""; render(); };
 $("tabs").addEventListener("click", e => { const b=e.target.closest("button"); if(!b) return;
   tab=b.dataset.t; document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("on",x===b)); renderPrompts(); });
 document.querySelectorAll("[data-copy]").forEach(b => b.onclick = async () => {
