@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invitaciones de Boda IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:wght@400;600&family=Josefin+Sans:wght@300;400&family=Poiret+One&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f3ee; --panel:#ffffff; --ink:#2b2420; --muted:#7a6f66; --line:#e4dbd1;
+  --accent:#a8774a; --accent-ink:#fff; --field:#fbf9f6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1b1816; --panel:#262220; --ink:#f1ebe4; --muted:#b0a59a; --line:#3a3431;
+    --accent:#d3a272; --accent-ink:#1b1816; --field:#1f1c1a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1b1816; --panel:#262220; --ink:#f1ebe4; --muted:#b0a59a; --line:#3a3431;
+  --accent:#d3a272; --accent-ink:#1b1816; --field:#1f1c1a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:20px 16px 8px;max-width:1300px;margin:0 auto}
+header h1{font-family:"Playfair Display",serif;font-weight:600;margin:0;font-size:28px}
+header p{margin:4px 0 0;color:var(--muted)}
+main{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:20px;max-width:1300px;margin:0 auto;padding:12px 16px 40px}
+@media (max-width:900px){main{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:18px 0 8px}
+.panel h2:first-child{margin-top:0}
+label{display:block;font-size:13px;color:var(--muted);margin:8px 0 3px}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--ink);font:inherit}
+textarea{resize:vertical;min-height:60px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+button,.btn{appearance:none;border:1px solid var(--line);background:var(--field);color:var(--ink);padding:9px 14px;border-radius:8px;font:inherit;cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button:hover{filter:brightness(.97)}
+.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.theme{border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center;cursor:pointer;font-size:13px;background:var(--field)}
+.theme.on{outline:2px solid var(--accent);border-color:transparent}
+.theme .sw{height:26px;border-radius:6px;margin-bottom:5px}
+.right{display:flex;flex-direction:column;gap:20px;min-width:0}
+.preview{display:flex;justify-content:center;align-items:flex-start;background:repeating-conic-gradient(var(--line) 0 25%,transparent 0 50%) 0 0/20px 20px;border-radius:12px;padding:16px}
+canvas{max-width:100%;max-height:78vh;height:auto;box-shadow:0 10px 30px rgba(0,0,0,.18);border-radius:4px;background:#fff}
+.prompt-box{position:relative}
+.prompt-box pre{white-space:pre-wrap;word-break:break-word;background:var(--field);border:1px solid var(--line);border-radius:8px;padding:12px;margin:4px 0 0;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;max-height:220px;overflow:auto}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.tabs button{padding:6px 10px;font-size:13px}
+.tabs button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+.check{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--muted)}
+.check input{width:auto}
+</style>
+</head>
+<body>
+<header>
+  <h1>Invitaciones de Boda IA</h1>
+  <p>Diseña tu invitación, genera el prompt para tu IA de imágenes favorita y exporta el resultado en PNG.</p>
+</header>
+
+<main>
+  <!-- FORMULARIO -->
+  <section class="panel" id="form">
+    <h2>Los novios</h2>
+    <div class="row">
+      <div><label for="n1">Nombre 1</label><input id="n1" value="Valentina"></div>
+      <div><label for="n2">Nombre 2</label><input id="n2" value="Mateo"></div>
+    </div>
+    <label for="intro">Frase de introducción</label>
+    <input id="intro" value="Con la bendición de Dios y nuestras familias, te invitamos a nuestra boda">
+
+    <h2>Evento</h2>
+    <div class="row">
+      <div><label for="fecha">Fecha</label><input id="fecha" type="date" value="2027-06-12"></div>
+      <div><label for="hora">Hora</label><input id="hora" type="time" value="17:00"></div>
+    </div>
+    <label for="ceremonia">Ceremonia</label>
+    <input id="ceremonia" value="Parroquia San José · Calle 10 #23-45">
+    <label for="recepcion">Recepción</label>
+    <input id="recepcion" value="Hacienda Los Olivos">
+    <div class="row">
+      <div><label for="dress">Código de vestimenta</label><input id="dress" value="Formal"></div>
+      <div><label for="rsvp">Confirmar asistencia</label><input id="rsvp" value="RSVP: +57 300 000 0000"></div>
+    </div>
+    <label for="mensaje">Mensaje final</label>
+    <textarea id="mensaje">Tu presencia es nuestro mejor regalo</textarea>
+
+    <h2>Estilo</h2>
+    <div class="themes" id="themes"></div>
+
+    <div class="row">
+      <div>
+        <label for="motivo">Elemento gráfico</label>
+        <select id="motivo">
+          <option value="rosas">Rosas</option>
+          <option value="peonias">Peonías</option>
+          <option value="eucalipto">Eucalipto</option>
+          <option value="girasoles">Girasoles</option>
+          <option value="lavanda">Lavanda</option>
+          <option value="anillos">Anillos</option>
+          <option value="palmeras">Palmeras</option>
+          <option value="geometrico">Geometría</option>
+        </select>
+      </div>
+      <div>
+        <label for="formato">Formato</label>
+        <select id="formato">
+          <option value="vertical">Tarjeta 5×7 (vertical)</option>
+          <option value="cuadrado">Cuadrado (Instagram)</option>
+          <option value="historia">Historia 9:16 (WhatsApp/IG)</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div><label for="c1">Color principal</label><input id="c1" type="color"></div>
+      <div><label for="c2">Color de acento</label><input id="c2" type="color"></div>
+    </div>
+    <label for="extra">Detalles extra para el prompt (opcional)</label>
+    <input id="extra" placeholder="ej. acuarela suave, luz dorada de atardecer">
+
+    <h2>Fondo generado por IA</h2>
+    <input id="bgfile" type="file" accept="image/*">
+    <label class="check"><input type="checkbox" id="veil" checked> Velo claro sobre la imagen para que el texto se lea</label>
+    <div class="hint">Copia el prompt, genera la imagen en Midjourney, DALL·E, Stable Diffusion, etc., y súbela aquí como fondo.</div>
+    <div class="btns"><button id="clearbg">Quitar fondo</button></div>
+
+    <h2>Proyecto</h2>
+    <div class="btns">
+      <button id="saveJson">Guardar proyecto</button>
+      <label class="btn" for="loadJson" style="margin:0;color:var(--ink);font-size:15px">Abrir proyecto</label>
+      <input id="loadJson" type="file" accept="application/json" hidden>
+    </div>
+  </section>
+
+  <!-- VISTA PREVIA + PROMPTS -->
+  <section class="right">
+    <div class="panel">
+      <h2>Vista previa</h2>
+      <div class="preview"><canvas id="cv"></canvas></div>
+      <div class="btns">
+        <button class="primary" id="png">Descargar PNG</button>
+        <button id="print">Imprimir / PDF</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Prompt de gráficos</h2>
+      <div class="tabs" id="tabs">
+        <button data-t="midjourney" class="on">Midjourney</button>
+        <button data-t="sd">Stable Diffusion</button>
+        <button data-t="dalle">DALL·E / ChatGPT</button>
+        <button data-t="es">Español (genérico)</button>
+      </div>
+      <div class="prompt-box">
+        <label>Prompt</label>
+        <pre id="pPos"></pre>
+        <div class="btns"><button class="primary" data-copy="pPos">Copiar prompt</button></div>
+      </div>
+      <div class="prompt-box" id="negWrap">
+        <label>Prompt negativo</label>
+        <pre id="pNeg"></pre>
+        <div class="btns"><button data-copy="pNeg">Copiar negativo</button></div>
+      </div>
+      <div class="hint">El prompt pide la imagen <b>sin texto</b>: las IAs suelen escribir letras deformes. El texto lo pone esta app encima.</div>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+// ---------- Datos de estilos ----------
+const THEMES = {
+  clasico:   {name:"Clásico",    c1:"#1f2a44", c2:"#c9a24b", paper:"#fbf8f1", script:"Great Vibes", serif:"Playfair Display",
+              en:"classic elegant luxury wedding stationery, ornate filigree frame, fine line flourishes, embossed texture",
+              es:"papelería de boda clásica y elegante, marco de filigrana ornamental, trazos finos, textura en relieve"},
+  floral:    {name:"Floral",     c1:"#8a4b5c", c2:"#e8b4b8", paper:"#fff8f6", script:"Great Vibes", serif:"Cormorant Garamond",
+              en:"romantic watercolor floral wedding invitation, lush flower arrangements in the corners, soft painterly petals",
+              es:"invitación de boda floral romántica en acuarela, arreglos de flores en las esquinas, pétalos suaves"},
+  rustico:   {name:"Rústico",    c1:"#4a5a3c", c2:"#b08a5b", paper:"#f4efe4", script:"Great Vibes", serif:"Cormorant Garamond",
+              en:"rustic boho wedding invitation, kraft paper texture, hand-drawn greenery branches, dried flowers, earthy tones",
+              es:"invitación de boda rústica boho, textura de papel kraft, ramas verdes dibujadas a mano, flores secas"},
+  minimal:   {name:"Minimal",    c1:"#222222", c2:"#9a9a9a", paper:"#ffffff", script:"Great Vibes", serif:"Josefin Sans",
+              en:"minimalist modern wedding invitation, clean layout, lots of white space, single fine line art, subtle arch shape",
+              es:"invitación de boda minimalista y moderna, diseño limpio, mucho espacio en blanco, una línea fina, arco sutil"},
+  playa:     {name:"Playa",      c1:"#1e6f86", c2:"#f2b880", paper:"#fdf8f0", script:"Great Vibes", serif:"Cormorant Garamond",
+              en:"tropical beach wedding invitation, soft ocean waves, warm sunset sky, palm leaves, light airy watercolor",
+              es:"invitación de boda en la playa, olas suaves, atardecer cálido, hojas de palma, acuarela luminosa"},
+  deco:      {name:"Art déco",   c1:"#121212", c2:"#d4af37", paper:"#121212", script:"Great Vibes", serif:"Poiret One",
+              en:"art deco gatsby wedding invitation, black and gold, geometric fan patterns, symmetrical stepped border, metallic foil",
+              es:"invitación de boda art déco estilo Gatsby, negro y dorado, abanicos geométricos, borde escalonado, foil metálico"}
+};
+const MOTIFS = {
+  rosas:["roses","rosas"], peonias:["peonies","peonías"], eucalipto:["eucalyptus leaves","hojas de eucalipto"],
+  girasoles:["sunflowers","girasoles"], lavanda:["lavender sprigs","ramitas de lavanda"], anillos:["two interlocked wedding rings","dos anillos de boda entrelazados"],
+  palmeras:["palm trees and tropical leaves","palmeras y hojas tropicales"], geometrico:["geometric gold lines","líneas geométricas doradas"]
+};
+const FORMATS = {
+  vertical:{w:1500,h:2100,ar:"5:7",  sd:"832x1152", dalle:"vertical (1024x1792)", en:"vertical 5x7 card", es:"tarjeta vertical 5x7"},
+  cuadrado:{w:1080,h:1080,ar:"1:1",  sd:"1024x1024", dalle:"square (1024x1024)",  en:"square format",     es:"formato cuadrado"},
+  historia:{w:1080,h:1920,ar:"9:16", sd:"768x1344", dalle:"vertical (1024x1792)", en:"vertical 9:16 phone story format", es:"formato vertical 9:16 para historia"}
+};
+
+// ---------- Estado ----------
+const $ = id => document.getElementById(id);
+const FIELDS = ["n1","n2","intro","fecha","hora","ceremonia","recepcion","dress","rsvp","mensaje","motivo","formato","c1","c2","extra"];
+let state = {theme:"clasico"};
+let bgImg = null, tab = "midjourney";
+
+function buildThemeButtons(){
+  const box = $("themes");
+  for (const [k,t] of Object.entries(THEMES)){
+    const d = document.createElement("div");
+    d.className = "theme"; d.dataset.k = k;
+    d.innerHTML = `<div class="sw" style="background:linear-gradient(90deg,${t.paper} 0 33%,${t.c1} 33% 66%,${t.c2} 66%)"></div>${t.name}`;
+    d.onclick = () => { state.theme = k; $("c1").value = t.c1; $("c2").value = t.c2; sync(); };
+    box.appendChild(d);
+  }
+}
+function readForm(){ for (const f of FIELDS) state[f] = $(f).value; state.veil = $("veil").checked; }
+function writeForm(s){ for (const f of FIELDS) if (s[f] !== undefined) $(f).value = s[f]; if (s.veil !== undefined) $("veil").checked = s.veil; state = {...state, ...s}; }
+
+// ---------- Utilidades ----------
+function fmtFecha(v){
+  if(!v) return "";
+  const [y,m,d] = v.split("-").map(Number);
+  const dt = new Date(y, m-1, d);
+  const s = dt.toLocaleDateString("es-ES",{weekday:"long", day:"numeric", month:"long", year:"numeric"});
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+function fmtHora(v){
+  if(!v) return "";
+  const [h,m] = v.split(":").map(Number);
+  const ap = h >= 12 ? "p. m." : "a. m."; const h12 = ((h+11)%12)+1;
+  return `${h12}:${String(m).padStart(2,"0")} ${ap}`;
+}
+function hexToRgb(h){ const n = parseInt(h.slice(1),16); return [n>>16&255, n>>8&255, n&255]; }
+function rgba(h,a){ const [r,g,b] = hexToRgb(h); return `rgba(${r},${g},${b},${a})`; }
+function isDark(h){ const [r,g,b] = hexToRgb(h); return (r*299+g*587+b*114)/1000 < 110; }
+function colorName(h){
+  const [r,g,b] = hexToRgb(h).map(x=>x/255);
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b), l=(mx+mn)/2, d=mx-mn;
+  if (d < .08) return l>.85?["white","blanco"]:l<.2?["black","negro"]:["grey","gris"];
+  let hue = mx===r ? ((g-b)/d)%6 : mx===g ? (b-r)/d+2 : (r-g)/d+4; hue = (hue*60+360)%360;
+  const tone = l<.3?["deep ","profundo"]:l>.75?["pastel ","pastel"]:["",""];
+  const names = [[15,"red","rojo"],[40,"terracotta","terracota"],[55,"gold","dorado"],[75,"mustard","mostaza"],[150,"sage green","verde salvia"],
+                 [190,"teal","verde azulado"],[250,"navy blue","azul"],[290,"lavender","lavanda"],[335,"magenta","magenta"],[360,"dusty rose","rosa palo"]];
+  const n = names.find(x => hue <= x[0]);
+  return [tone[0]+n[1], n[2]+(tone[1]?" "+tone[1]:"")];
+}
+function wrap(ctx, text, maxW){
+  const words = text.split(/\s+/).filter(Boolean), lines = []; let cur = "";
+  for (const w of words){ const t = cur ? cur+" "+w : w; if (ctx.measureText(t).width > maxW && cur){ lines.push(cur); cur = w; } else cur = t; }
+  if (cur) lines.push(cur); return lines;
+}
+
+// ---------- Decoraciones (dibujo procedural) ----------
+function flower(ctx,x,y,r,petal,center,n=6){
+  ctx.save(); ctx.translate(x,y);
+  for(let i=0;i<n;i++){ ctx.rotate(Math.PI*2/n); ctx.beginPath(); ctx.ellipse(0,-r*.55,r*.38,r*.6,0,0,Math.PI*2); ctx.fillStyle=petal; ctx.fill(); }
+  ctx.beginPath(); ctx.arc(0,0,r*.28,0,Math.PI*2); ctx.fillStyle=center; ctx.fill(); ctx.restore();
+}
+function leaf(ctx,x,y,len,ang,col){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(ang); ctx.beginPath();
+  ctx.moveTo(0,0); ctx.quadraticCurveTo(len*.5,-len*.28,len,0); ctx.quadraticCurveTo(len*.5,len*.28,0,0);
+  ctx.fillStyle=col; ctx.fill(); ctx.restore();
+}
+function branch(ctx,x,y,len,ang,col,dir=1){
+  ctx.save(); ctx.translate(x,y); ctx.rotate(ang);
+  ctx.strokeStyle=col; ctx.lineWidth=len*.012; ctx.beginPath(); ctx.moveTo(0,0); ctx.quadraticCurveTo(len*.5,-len*.08*dir,len,0); ctx.stroke();
+  for(let i=1;i<9;i++){ const t=i/9, px=len*t, py=-len*.08*dir*4*t*(1-t)*.5;
+    leaf(ctx,px,py,len*.16*(1-t*.4),-0.9,col); leaf(ctx,px,py,len*.16*(1-t*.4),0.9,col); }
+  ctx.restore();
+}
+function cornerFlourish(ctx,x,y,s,col,sx,sy){
+  ctx.save(); ctx.translate(x,y); ctx.scale(sx,sy); ctx.strokeStyle=col; ctx.lineWidth=s*.02;
+  ctx.beginPath(); ctx.moveTo(0,s); ctx.bezierCurveTo(0,s*.3,s*.3,0,s,0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(s*.15,s*.85); ctx.bezierCurveTo(s*.2,s*.45,s*.45,s*.2,s*.85,s*.15); ctx.stroke();
+  ctx.beginPath(); ctx.arc(s*.32,s*.32,s*.06,0,Math.PI*2); ctx.fillStyle=col; ctx.fill();
+  ctx.restore();
+}
+function rings(ctx,x,y,r,col){
+  ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=r*.16;
+  ctx.beginPath(); ctx.arc(x-r*.45,y,r,0,Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(x+r*.45,y,r,0,Math.PI*2); ctx.stroke();
+  ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(x+r*.45,y-r*1.25); ctx.lineTo(x+r*.7,y-r*1.55); ctx.lineTo(x+r*.45,y-r*1.85); ctx.lineTo(x+r*.2,y-r*1.55); ctx.fill();
+  ctx.restore();
+}
+
+function decorate(ctx,W,H,t,c1,c2,motif){
+  const u = Math.min(W,H);
+  const flowerSet = () => {
+    const petal = motif==="girasoles" ? "#f2c230" : motif==="lavanda" ? "#9b87c9" : c2;
+    const center = motif==="girasoles" ? "#6b4423" : c1;
+    const green = "#6f8a5e";
+    const cluster = (x,y,sx,sy) => {
+      branch(ctx,x,y,u*.32,Math.atan2(sy,sx)*0+ (sx>0?0:Math.PI) + (sy>0?0.5*sx:-0.5*sx),green, sy);
+      branch(ctx,x,y,u*.28,(sy>0?Math.PI/2:-Math.PI/2) - 0.4*sx*sy,green);
+      flower(ctx,x+sx*u*.04,y+sy*u*.04,u*.075,petal,center,motif==="girasoles"?12:6);
+      flower(ctx,x+sx*u*.14,y+sy*u*.015,u*.05,rgba(petal,.8),center);
+      flower(ctx,x+sx*u*.02,y+sy*u*.15,u*.045,rgba(petal,.7),center);
+    };
+    cluster(u*.04,u*.04,1,1); cluster(W-u*.04,H-u*.04,-1,-1);
+  };
+
+  ctx.save();
+  switch(t){
+    case "clasico": {
+      const m = u*.04; ctx.strokeStyle=c2; ctx.lineWidth=u*.004; ctx.strokeRect(m,m,W-2*m,H-2*m);
+      ctx.lineWidth=u*.0015; ctx.strokeRect(m*1.5,m*1.5,W-3*m,H-3*m);
+      const s=u*.16, o=m*1.9;
+      cornerFlourish(ctx,o,o,s,c2,1,1); cornerFlourish(ctx,W-o,o,s,c2,-1,1);
+      cornerFlourish(ctx,o,H-o,s,c2,1,-1); cornerFlourish(ctx,W-o,H-o,s,c2,-1,-1);
+      break;
+    }
+    case "floral": flowerSet(); break;
+    case "rustico": {
+      const g = "#6f8a5e";
+      branch(ctx,W*.5,u*.09,u*.3,Math.PI*0.97,g,1); branch(ctx,W*.5,u*.09,u*.3,Math.PI*0.03,g,-1);
+      branch(ctx,W*.5,H-u*.09,u*.3,Math.PI*1.03,g,-1); branch(ctx,W*.5,H-u*.09,u*.3,-Math.PI*0.03,g,1);
+      ctx.strokeStyle=rgba(c2,.6); ctx.setLineDash([u*.01,u*.008]); ctx.lineWidth=u*.002;
+      ctx.strokeRect(u*.035,u*.035,W-u*.07,H-u*.07); ctx.setLineDash([]);
+      break;
+    }
+    case "minimal": {
+      ctx.strokeStyle=c2; ctx.lineWidth=u*.0025; const aw=W*.72, ax=(W-aw)/2, top=H*.07, bot=H*.93;
+      ctx.beginPath(); ctx.moveTo(ax,bot); ctx.lineTo(ax,top+aw/2); ctx.arc(W/2,top+aw/2,aw/2,Math.PI,0); ctx.lineTo(ax+aw,bot); ctx.stroke();
+      break;
+    }
+    case "playa": {
+      ctx.fillStyle=rgba(c2,.35); ctx.beginPath(); ctx.arc(W*.82,H*.1,u*.09,0,Math.PI*2); ctx.fill();
+      for(let i=0;i<3;i++){
+        ctx.fillStyle=rgba(c1,.18+i*.12); ctx.beginPath(); const yb=H-u*(.12-i*.035);
+        ctx.moveTo(0,yb); for(let x=0;x<=W;x+=W/40) ctx.lineTo(x,yb+Math.sin(x/W*Math.PI*4+i)*u*.015);
+        ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.fill();
+      }
+      for(let i=0;i<7;i++) leaf(ctx,0,H*.13,u*.2,-0.6+i*0.28,rgba("#3f7d5a",.55));
+      break;
+    }
+    case "deco": {
+      ctx.strokeStyle=c2; ctx.lineWidth=u*.003; const m=u*.04;
+      ctx.strokeRect(m,m,W-2*m,H-2*m); ctx.strokeRect(m*1.6,m*1.6,W-3.2*m,H-3.2*m);
+      const fan=(cx,cy,r,a0)=>{ for(let i=0;i<=8;i++){ const a=a0+Math.PI*i/8; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r); ctx.stroke(); }
+        ctx.beginPath(); ctx.arc(cx,cy,r,a0,a0+Math.PI); ctx.stroke(); ctx.beginPath(); ctx.arc(cx,cy,r*.6,a0,a0+Math.PI); ctx.stroke(); };
+      fan(W/2,m*1.6,u*.12,0); fan(W/2,H-m*1.6,u*.12,Math.PI);
+      for(const [x,y] of [[m*1.6,m*1.6],[W-m*1.6,m*1.6],[m*1.6,H-m*1.6],[W-m*1.6,H-m*1.6]]){
+        ctx.save(); ctx.translate(x,y); ctx.rotate(Math.PI/4); ctx.strokeRect(-u*.025,-u*.025,u*.05,u*.05); ctx.restore(); }
+      break;
+    }
+  }
+  ctx.restore();
+}
+// Acento pequeño centrado sobre el texto (según el elemento gráfico elegido)
+function hasAccent(t,motif){
+  return motif==="anillos" || motif==="eucalipto" && t!=="rustico" ||
+         ["rosas","peonias","girasoles","lavanda"].includes(motif) && t!=="floral" && t!=="deco";
+}
+function accent(ctx,x,y,u,t,motif,c1,c2){
+  if (!hasAccent(t,motif)) return;
+  if (motif==="anillos") rings(ctx,x,y+u*.02,u*.03,c2);
+  else if (motif==="eucalipto") { branch(ctx,x,y,u*.13,Math.PI,"#7d9a85",1); branch(ctx,x,y,u*.13,0,"#7d9a85",-1); }
+  else flower(ctx,x,y,u*.04,motif==="girasoles"?"#f2c230":motif==="lavanda"?"#9b87c9":c2,c1,motif==="girasoles"?12:6);
+}
+// Margen seguro (arriba/abajo) que deja cada estilo libre para el texto
+const SAFE = {clasico:.13, floral:.2, rustico:.19, minimal:.17, playa:.2, deco:.25};
+
+// ---------- Render ----------
+function render(){
+  const cv = $("cv"), ctx = cv.getContext("2d");
+  const F = FORMATS[state.formato] || FORMATS.vertical, T = THEMES[state.theme];
+  const W = cv.width = F.w, H = cv.height = F.h, u = Math.min(W,H);
+  const c1 = state.c1 || T.c1, c2 = state.c2 || T.c2;
+
+  ctx.fillStyle = T.paper; ctx.fillRect(0,0,W,H);
+  let dark = isDark(T.paper);
+  if (bgImg){
+    const s = Math.max(W/bgImg.width, H/bgImg.height), iw=bgImg.width*s, ih=bgImg.height*s;
+    ctx.drawImage(bgImg,(W-iw)/2,(H-ih)/2,iw,ih);
+    if (state.veil){ ctx.fillStyle = dark ? "rgba(10,10,10,.55)" : "rgba(255,255,255,.62)"; ctx.fillRect(W*.1,H*.1,W*.8,H*.8); }
+  } else {
+    decorate(ctx,W,H,state.theme,c1,c2,state.motivo);
+  }
+  const ink = dark ? "#f3eee6" : c1;
+  const soft = dark ? rgba("#f3eee6",.8) : rgba(c1,.8);
+
+  // Bloques de texto: [texto, estilo, familia, tamaño relativo, color, interlineado, espacio antes]
+  const S = T.serif, SC = T.script, B = [];
+  const add = (txt, style, fam, size, color, gap, before=0) => { if (txt) B.push({txt, style, fam, size, color, gap, before}); };
+  add((state.intro||"").toUpperCase(), "400", S, .026, soft, 1.55);
+  add(state.n1, "", SC, .14, ink, 1.05, .035);
+  add("&", "italic", "Playfair Display", .06, c2, 1.0);
+  add(state.n2, "", SC, .14, ink, 1.05);
+  B.push({sep:true, before:.03, h:.05});
+  add(fmtFecha(state.fecha), "600", S, .038, ink, 1.4);
+  add(fmtHora(state.hora), "400", S, .03, soft, 1.5);
+  if (state.ceremonia){ add("CEREMONIA", "600", S, .021, c2, 1.6, .03); add(state.ceremonia, "400", S, .029, ink, 1.35); }
+  if (state.recepcion){ add("RECEPCIÓN", "600", S, .021, c2, 1.6, .025); add(state.recepcion, "400", S, .029, ink, 1.35); }
+  if (state.dress) add("Vestimenta: " + state.dress, "italic 400", S, .025, soft, 1.5, .025);
+  add(state.mensaje, "", SC, .055, ink, 1.15, .035);
+  add(state.rsvp, "400", S, .023, soft, 1.4, .02);
+
+  const accentH = hasAccent(state.theme, state.motivo) && !bgImg ? u*.09 : 0;
+  const top = (bgImg ? H*.13 : u*SAFE[state.theme]) + (state.theme==="minimal" ? W*.12 : 0) + accentH;
+  const avail = H - top - (bgImg ? H*.13 : u*SAFE[state.theme]);
+  const maxW = W * ({minimal:.62, floral:.62, playa:.62}[state.theme] || .7);
+
+  // Mide la altura total con una escala dada (el ajuste de líneas depende del tamaño)
+  const layout = sc => {
+    let h = 0; const out = [];
+    for (const b of B){
+      h += (b.before||0) * u * sc;
+      if (b.sep){ out.push({sep:true, y:h + b.h*u*sc/2}); h += b.h*u*sc; continue; }
+      const px = b.size * u * sc; ctx.font = `${b.style} ${px}px "${b.fam}"`;
+      for (const l of wrap(ctx, b.txt, maxW)){ out.push({l, font:ctx.font, color:b.color, y:h + px*b.gap/2}); h += px*b.gap; }
+    }
+    return {h, out};
+  };
+  let sc = 1, L = layout(sc);
+  for (let i=0; i<4 && Math.abs(L.h-avail) > 2; i++){ sc = Math.min(sc*avail/L.h, 1.25); L = layout(sc); if (sc >= 1.25) break; }
+
+  const y0 = top + Math.max(0, (avail - L.h)/2);
+  if (!bgImg) accent(ctx, W/2, y0 - accentH*.55, u, state.theme, state.motivo, c1, c2);
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  for (const o of L.out){
+    const y = y0 + o.y;
+    if (o.sep){
+      ctx.strokeStyle = c2; ctx.lineWidth = u*.002; ctx.beginPath(); ctx.moveTo(W/2-u*.12,y); ctx.lineTo(W/2+u*.12,y); ctx.stroke();
+      ctx.fillStyle = c2; ctx.save(); ctx.translate(W/2,y); ctx.rotate(Math.PI/4); ctx.fillRect(-u*.008,-u*.008,u*.016,u*.016); ctx.restore();
+    } else { ctx.font = o.font; ctx.fillStyle = o.color; ctx.fillText(o.l, W/2, y); }
+  }
+}
+
+// ---------- Prompts ----------
+function prompts(){
+  const T = THEMES[state.theme], F = FORMATS[state.formato], M = MOTIFS[state.motivo];
+  const col1 = colorName(state.c1 || T.c1), col2 = colorName(state.c2 || T.c2);
+  const extra = (state.extra||"").trim();
+  const enCore = `${T.en}, featuring ${M[0]}, color palette of ${col1[0]} and ${col2[0]} on ${isDark(T.paper)?"black":"ivory"} paper, `+
+    `${F.en}, decorative elements only around the edges, large empty blank center area reserved for text, flat lay, top view, `+
+    `high detail, print quality, 300 dpi, professional graphic design${extra?", "+extra:""}`;
+  const neg = "text, letters, words, typography, writing, numbers, watermark, signature, logo, people, faces, blurry, low quality, jpeg artifacts, distorted, cluttered center";
+  switch(tab){
+    case "midjourney": return {pos:`${enCore}, no text --ar ${F.ar} --style raw --v 7 --no ${neg.split(", ").slice(0,8).join(", ")}`, neg:null};
+    case "sd": return {pos:`${enCore}, masterpiece, best quality\n\nTamaño sugerido: ${F.sd} · Steps 30 · CFG 6-7`, neg};
+    case "dalle": return {pos:`Create a ${F.dalle} background design for a wedding invitation. Style: ${T.en}. Include ${M[0]}. `+
+       `Use a color palette of ${col1[0]} and ${col2[0]}. Keep all decoration around the borders and leave a large, clean, empty space in the center for text that I will add later. `+
+       `Do NOT include any text, letters or numbers anywhere in the image.${extra?" Extra details: "+extra+".":""}`, neg:null};
+    case "es": return {pos:`Fondo para ${T.es}, con ${M[1]}, paleta de colores ${col1[1]} y ${col2[1]}, ${F.es}, `+
+       `decoración solo en los bordes, gran espacio vacío en el centro para el texto, vista cenital, alta resolución, calidad de impresión, sin texto ni letras${extra?", "+extra:""}.`,
+       neg:"texto, letras, palabras, números, marca de agua, logotipos, personas, borroso, baja calidad, distorsionado"};
+  }
+}
+function renderPrompts(){
+  const p = prompts(); $("pPos").textContent = p.pos;
+  $("negWrap").style.display = p.neg ? "" : "none"; $("pNeg").textContent = p.neg || "";
+}
+
+// ---------- Orquestación ----------
+function sync(){
+  readForm();
+  document.querySelectorAll(".theme").forEach(el => el.classList.toggle("on", el.dataset.k === state.theme));
+  render(); renderPrompts();
+  try { localStorage.setItem("invitacion-boda", JSON.stringify(state)); } catch(e){}
+}
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1600); }
+function download(name, url){ const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
+function slug(){ return `invitacion-${(state.n1||"").trim()}-${(state.n2||"").trim()}`.toLowerCase().replace(/[^a-z0-9áéíóúñ-]+/g,"-"); }
+
+buildThemeButtons();
+$("c1").value = THEMES.clasico.c1; $("c2").value = THEMES.clasico.c2;
+try { const saved = JSON.parse(localStorage.getItem("invitacion-boda")||"null"); if (saved) writeForm(saved); } catch(e){}
+
+FIELDS.concat("veil").forEach(f => $(f).addEventListener("input", sync));
+$("tabs").addEventListener("click", e => { const b=e.target.closest("button"); if(!b) return;
+  tab=b.dataset.t; document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("on",x===b)); renderPrompts(); });
+document.querySelectorAll("[data-copy]").forEach(b => b.onclick = async () => {
+  const txt = $(b.dataset.copy).textContent;
+  try { await navigator.clipboard.writeText(txt); toast("Copiado ✓"); }
+  catch(e){ const r=document.createRange(); r.selectNodeContents($(b.dataset.copy)); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast("Selecciona y copia con Ctrl+C"); }
+});
+$("bgfile").onchange = e => { const f=e.target.files[0]; if(!f) return; const img=new Image();
+  img.onload=()=>{ bgImg=img; render(); }; img.src=URL.createObjectURL(f); };
+$("clearbg").onclick = () => { bgImg=null; $("bgfile").value=""; render(); };
+$("png").onclick = () => download(slug()+".png", $("cv").toDataURL("image/png"));
+$("print").onclick = () => { const w=window.open(""); if(!w){ toast("Permite ventanas emergentes"); return; }
+  w.document.write(`<title>${slug()}</title><style>@page{margin:0}body{margin:0;display:flex;justify-content:center}img{max-width:100%;max-height:100vh}</style><img src="${$("cv").toDataURL()}" onload="print()">`); w.document.close(); };
+$("saveJson").onclick = () => { const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}); download(slug()+".json", URL.createObjectURL(blob)); };
+$("loadJson").onchange = async e => { const f=e.target.files[0]; if(!f) return;
+  try { writeForm(JSON.parse(await f.text())); sync(); toast("Proyecto cargado"); } catch(err){ toast("Archivo no válido"); } };
+
+// Espera a las fuentes para que el lienzo use las tipografías correctas
+const fontsToLoad = ['40px "Great Vibes"','40px "Playfair Display"','italic 40px "Playfair Display"','40px "Cormorant Garamond"','600 40px "Cormorant Garamond"','40px "Josefin Sans"','40px "Poiret One"'];
+sync();
+Promise.all(fontsToLoad.map(f => document.fonts.load(f).catch(()=>{}))).then(() => render());
+</script>
+</body>
+</html>
