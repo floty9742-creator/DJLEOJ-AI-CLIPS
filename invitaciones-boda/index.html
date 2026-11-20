@@ -6,7 +6,7 @@
 <title>Invitaciones de Boda IA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:wght@400;600&family=Josefin+Sans:wght@300;400&family=Poiret+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:wght@400;600&family=Josefin+Sans:wght@300;400&family=Poiret+One&family=Cinzel:wght@400;600&family=Parisienne&family=Pinyon+Script&family=Alex+Brush&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f7f3ee; --panel:#ffffff; --ink:#2b2420; --muted:#7a6f66; --line:#e4dbd1;
@@ -35,6 +35,7 @@ main{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:20px;m
 label{display:block;font-size:13px;color:var(--muted);margin:8px 0 3px}
 input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--ink);font:inherit}
 textarea{resize:vertical;min-height:60px}
+input[type=color]{height:42px;padding:4px;cursor:pointer}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 button,.btn{appearance:none;border:1px solid var(--line);background:var(--field);color:var(--ink);padding:9px 14px;border-radius:8px;font:inherit;cursor:pointer}
@@ -63,6 +64,18 @@ canvas{max-width:100%;max-height:78vh;height:auto;box-shadow:0 10px 30px rgba(0,
 .refrow{display:flex;gap:12px;align-items:center;margin-top:10px}
 .thumb{width:84px;height:84px;object-fit:cover;border-radius:8px;border:1px solid var(--line);flex:none}
 .pal{display:flex;gap:6px;flex-wrap:wrap}
+.chat .log{height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 2px;margin-bottom:10px}
+.msg{max-width:88%;padding:9px 12px;border-radius:14px;white-space:pre-wrap;word-break:break-word;font-size:14px}
+.msg.me{align-self:flex-end;background:var(--accent);color:var(--accent-ink);border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-start;background:var(--field);border:1px solid var(--line);border-bottom-left-radius:4px}
+.msg pre{white-space:pre-wrap;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;margin:8px 0 6px;max-height:160px;overflow:auto}
+.msg .mini{padding:5px 10px;font-size:12px}
+.sugs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.sug{padding:5px 10px;border-radius:999px;font-size:12px}
+.chatform{display:flex;gap:8px;align-items:flex-end}
+.chatform textarea{min-height:44px;height:44px}
+.chatform button{flex:none}
+@media (max-width:900px){.right{order:-1}}
 .pal span{width:28px;height:28px;border-radius:6px;border:1px solid var(--line)}
 </style>
 </head>
@@ -192,6 +205,16 @@ canvas{max-width:100%;max-height:78vh;height:auto;box-shadow:0 10px 30px rgba(0,
       </div>
     </div>
 
+    <div class="panel chat">
+      <h2>💬 Asistente de diseño</h2>
+      <div class="log" id="chatLog" aria-live="polite"></div>
+      <div class="sugs" id="chatSugs"></div>
+      <form class="chatform" id="chatForm">
+        <textarea id="chatIn" placeholder="Escribe lo que deseas… ej. quiero estilo playa con azul y dorado y mariposas"></textarea>
+        <button class="primary" type="submit">Enviar</button>
+      </form>
+    </div>
+
     <div class="panel">
       <h2>Prompt de gráficos</h2>
       <div class="btns" style="margin:0 0 10px"><button id="variar">🔄 Otra variación</button><span class="hint" id="varInfo" style="align-self:center;margin:0"></span></div>
@@ -238,7 +261,53 @@ const THEMES = {
               es:"invitación de boda en la playa, olas suaves, atardecer cálido, hojas de palma, acuarela luminosa"},
   deco:      {name:"Art déco",   c1:"#121212", c2:"#d4af37", paper:"#121212", script:"Great Vibes", serif:"Poiret One",
               en:"art deco gatsby wedding invitation, black and gold, geometric fan patterns, symmetrical stepped border, metallic foil",
-              es:"invitación de boda art déco estilo Gatsby, negro y dorado, abanicos geométricos, borde escalonado, foil metálico"}
+              es:"invitación de boda art déco estilo Gatsby, negro y dorado, abanicos geométricos, borde escalonado, foil metálico"},
+  botanico:  {name:"Botánico",   c1:"#2f4f3a", c2:"#a3b18a", paper:"#fbfaf5", script:"Great Vibes", serif:"Lora",
+              en:"botanical greenery wedding invitation, large lush leaves framing the sides, fresh green foliage, organic elegant",
+              es:"invitación de boda botánica, hojas grandes enmarcando los lados, follaje verde fresco, elegante y natural"},
+  boho:      {name:"Boho",       c1:"#8c4a2f", c2:"#d9a37a", paper:"#f6ede3", script:"Alex Brush", serif:"Josefin Sans",
+              en:"boho terracotta wedding invitation, retro rainbow arches, earthy desert tones, pampas grass, sun motif",
+              es:"invitación de boda boho en terracota, arcos arcoíris retro, tonos tierra del desierto, pasto pampa, sol"},
+  acuarela:  {name:"Acuarela",   c1:"#6a5a8c", c2:"#c8b6e2", paper:"#fffdfb", script:"Parisienne", serif:"Cormorant Garamond",
+              en:"dreamy pastel watercolor wash wedding invitation, soft blended color splashes, delicate hand-painted texture",
+              es:"invitación de boda en acuarela pastel, manchas de color suaves y difuminadas, textura delicada pintada a mano"},
+  marmol:    {name:"Mármol y oro",c1:"#2d2d2d", c2:"#c8a24a", paper:"#f7f6f4", script:"Great Vibes", serif:"Cinzel",
+              en:"luxury white marble texture wedding invitation, gold foil geometric frame, glamorous and modern",
+              es:"invitación de boda de lujo con textura de mármol blanco, marco geométrico en foil dorado, glamurosa y moderna"},
+  celestial: {name:"Celestial",  c1:"#f1e6c8", c2:"#d4af37", paper:"#14213d", script:"Parisienne", serif:"Cinzel",
+              en:"celestial night sky wedding invitation, deep navy background, gold stars, crescent moon, constellations, magical",
+              es:"invitación de boda celestial, cielo nocturno azul profundo, estrellas doradas, luna creciente, constelaciones"},
+  limones:   {name:"Mediterráneo",c1:"#2b4c7e", c2:"#e9b824", paper:"#fffdf6", script:"Great Vibes", serif:"Lora",
+              en:"mediterranean amalfi coast wedding invitation, hand-painted lemons with green leaves, blue and yellow, sunny italian summer",
+              es:"invitación de boda mediterránea estilo Amalfi, limones pintados a mano con hojas verdes, azul y amarillo, verano italiano"},
+  talavera:  {name:"Talavera",   c1:"#1d3f8f", c2:"#e0a526", paper:"#fffdf8", script:"Great Vibes", serif:"Lora",
+              en:"mexican talavera tile wedding invitation, cobalt blue ceramic tile pattern border, folk art, vibrant and festive",
+              es:"invitación de boda estilo talavera mexicana, borde de azulejos azul cobalto, arte folclórico, alegre y festiva"},
+  otono:     {name:"Otoño",      c1:"#7a3b1d", c2:"#d2691e", paper:"#fbf4ea", script:"Great Vibes", serif:"Cormorant Garamond",
+              en:"autumn fall wedding invitation, falling maple leaves in burnt orange, rust and burgundy, warm cozy tones",
+              es:"invitación de boda de otoño, hojas de arce cayendo en naranja quemado, óxido y vino, tonos cálidos"},
+  invierno:  {name:"Invierno",   c1:"#2c4a6b", c2:"#9fbfdc", paper:"#f7fafc", script:"Parisienne", serif:"Cormorant Garamond",
+              en:"winter wonderland wedding invitation, delicate snowflakes, icy blue and silver, frosted elegant",
+              es:"invitación de boda de invierno, copos de nieve delicados, azul hielo y plateado, elegante y escarchada"},
+  vintage:   {name:"Vintage",    c1:"#5b4636", c2:"#b89b72", paper:"#f3ead8", script:"Pinyon Script", serif:"Lora",
+              en:"vintage lace wedding invitation, scalloped lace border, aged cream paper, antique victorian ornaments, sepia",
+              es:"invitación de boda vintage, borde de encaje festoneado, papel crema envejecido, adornos victorianos, sepia"},
+  religioso: {name:"Religioso",  c1:"#2a3550", c2:"#c9a24b", paper:"#fdfbf6", script:"Parisienne", serif:"Cormorant Garamond",
+              en:"elegant christian church wedding invitation, golden cross with soft light rays, white doves, serene and sacred",
+              es:"invitación de boda religiosa, cruz dorada con rayos de luz suaves, palomas blancas, serena y sagrada"},
+  moderno:   {name:"Editorial",  c1:"#111111", c2:"#c75b39", paper:"#f2efe9", script:"Alex Brush", serif:"Josefin Sans",
+              en:"modern editorial wedding invitation, bold abstract shapes, color blocking, contemporary magazine layout",
+              es:"invitación de boda moderna editorial, formas abstractas grandes, bloques de color, diseño de revista contemporáneo"}
+};
+// Palabras clave para que el chat reconozca cada estilo (sin tildes)
+const THEME_KW = {
+  clasico:["clasic","tradicional"], floral:["floral","romantic"], rustico:["rustic","campestre","campo","granja","madera","kraft"],
+  minimal:["minimalista","minimal"], playa:["playa","el mar","al mar","del mar","oceano","costa","tropical"], deco:["art deco","gatsby","anos 20"],
+  botanico:["botanic","follaje","greenery","selva","jungla"], boho:["boho","terracota","bohemi","arcoiris","desierto"],
+  acuarela:["acuarela"], marmol:["marmol","lujo","lujos","glamour","glam"], celestial:["celestial","estrella","luna","cielo estrellado","noche estrellada","galaxia","constelacion"],
+  limones:["limon","limones","mediterrane","italia","italian","toscana","amalfi","grecia"], talavera:["talavera","mexican","azulejo","ceramica","folclor","folklor"],
+  otono:["otono","hojas secas","calabaza"], invierno:["invierno","nieve","navidad","copos"], vintage:["vintage","encaje","antigu","retro","victorian"],
+  religioso:["religios","iglesia","catolic","cristian","cruz","sagrad"], moderno:["modern","editorial","contemporane","urbano"]
 };
 const MOTIFS = {
   rosas:["roses","rosas"], peonias:["peonies","peonías"], eucalipto:["eucalyptus leaves","hojas de eucalipto"],
@@ -397,6 +466,25 @@ function rings(ctx,x,y,r,col){
   ctx.restore();
 }
 
+function rng(seed){ let s = seed*9973 % 2147483647; return () => (s = s*16807 % 2147483647) / 2147483647; }
+// Puntos aleatorios (repetibles) solo en los márgenes, para no tapar el texto
+function marginPoints(W,H,n,seed){ const r = rng(seed), pts = []; let g = 0;
+  while (pts.length < n && g++ < 9000){ const x=r()*W, y=r()*H; if (x>W*.14 && x<W*.86 && y>H*.12 && y<H*.88) continue; pts.push([x,y,r()]); }
+  return pts; }
+function sparkle(ctx,x,y,r,col){ ctx.save(); ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(x,y-r);
+  ctx.quadraticCurveTo(x,y,x+r,y); ctx.quadraticCurveTo(x,y,x,y+r); ctx.quadraticCurveTo(x,y,x-r,y); ctx.quadraticCurveTo(x,y,x,y-r); ctx.fill(); ctx.restore(); }
+function snowflake(ctx,x,y,r,col,u){ ctx.save(); ctx.translate(x,y); ctx.strokeStyle=col; ctx.lineWidth=Math.max(1,u*.0016);
+  for(let i=0;i<6;i++){ ctx.rotate(Math.PI/3); ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,-r);
+    ctx.moveTo(0,-r*.55); ctx.lineTo(r*.22,-r*.78); ctx.moveTo(0,-r*.55); ctx.lineTo(-r*.22,-r*.78); ctx.stroke(); }
+  ctx.restore(); }
+function lemon(ctx,x,y,r,a,col){ ctx.save(); ctx.translate(x,y); ctx.rotate(a); ctx.beginPath(); ctx.ellipse(0,0,r,r*.72,0,0,Math.PI*2);
+  ctx.fillStyle=col; ctx.fill(); ctx.strokeStyle="rgba(120,90,0,.35)"; ctx.lineWidth=r*.05; ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(r*.98,0,r*.12,r*.08,0,0,Math.PI*2); ctx.fillStyle=col; ctx.fill();
+  ctx.beginPath(); ctx.ellipse(-r*.3,-r*.25,r*.25,r*.12,-.4,0,Math.PI*2); ctx.fillStyle="rgba(255,255,255,.35)"; ctx.fill(); ctx.restore(); }
+function maple(ctx,x,y,r,a,col){ ctx.save(); ctx.translate(x,y); ctx.rotate(a); ctx.fillStyle=col; ctx.beginPath();
+  for (let i=0;i<10;i++){ const ang=-Math.PI/2+i*Math.PI/5, rad = i%2 ? r*.45 : r; ctx.lineTo(Math.cos(ang)*rad, Math.sin(ang)*rad); }
+  ctx.closePath(); ctx.fill(); ctx.strokeStyle=col; ctx.lineWidth=r*.08; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(0,r*1.2); ctx.stroke(); ctx.restore(); }
+
 function decorate(ctx,W,H,t,c1,c2,motif){
   const u = Math.min(W,H);
   const flowerSet = () => {
@@ -457,13 +545,105 @@ function decorate(ctx,W,H,t,c1,c2,motif){
         ctx.save(); ctx.translate(x,y); ctx.rotate(Math.PI/4); ctx.strokeRect(-u*.025,-u*.025,u*.05,u*.05); ctx.restore(); }
       break;
     }
+    case "botanico": {
+      for (const side of [-1,1]){ const x0 = side<0 ? 0 : W;
+        for (let i=0;i<8;i++){ const y = H*(.03+i*.135), a = (side<0 ? 0 : Math.PI) + side*(-.55+(i%3)*.4);
+          leaf(ctx,x0,y,u*(.17+.04*(i%2)),a,i%2?rgba(c1,.85):rgba(c2,.95)); } }
+      break;
+    }
+    case "boho": {
+      const cols=[c1,c2,rgba(c1,.45),rgba(c2,.45)];
+      for (let k=0;k<4;k++){ ctx.strokeStyle=cols[k]; ctx.lineWidth=u*.035;
+        ctx.beginPath(); ctx.arc(0,0,u*(.27-k*.05),0,Math.PI/2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(W,H,u*(.27-k*.05),Math.PI,Math.PI*1.5); ctx.stroke(); }
+      ctx.fillStyle=rgba(c2,.8); for(let i=0;i<5;i++){ ctx.beginPath(); ctx.arc(W/2+(i-2)*u*.03,u*.06,u*.006,0,Math.PI*2); ctx.fill(); }
+      for(let i=0;i<5;i++){ ctx.beginPath(); ctx.arc(W/2+(i-2)*u*.03,H-u*.06,u*.006,0,Math.PI*2); ctx.fill(); }
+      break;
+    }
+    case "acuarela": {
+      const r = rng(7);
+      for (const [cx,cy,k] of [[0,0,1],[W,H,1],[W,0,.55],[0,H,.55]])
+        for (let i=0;i<60*k;i++){ ctx.fillStyle = rgba(i%3?c2:c1, .07);
+          ctx.beginPath(); ctx.arc(cx+(cx?-1:1)*r()*u*.3*k, cy+(cy?-1:1)*r()*u*.3*k, u*(.03+r()*.08)*k, 0, Math.PI*2); ctx.fill(); }
+      break;
+    }
+    case "marmol": {
+      const r = rng(3);
+      for (let i=0;i<14;i++){ ctx.strokeStyle=`rgba(110,110,110,${.08+r()*.14})`; ctx.lineWidth=u*(.001+r()*.004);
+        ctx.beginPath(); let x=r()*W, y=-10; ctx.moveTo(x,y);
+        for (let k=0;k<4;k++){ const nx=x+(r()-.5)*W*.6, ny=y+H*.3; ctx.bezierCurveTo(x+(r()-.5)*W*.4,y+H*.1,nx+(r()-.5)*W*.4,ny-H*.1,nx,ny); x=nx; y=ny; }
+        ctx.stroke(); }
+      for (const [m,lw] of [[u*.04,u*.004],[u*.055,u*.0015]]){ const c=u*.05; ctx.strokeStyle=c2; ctx.lineWidth=lw; ctx.beginPath();
+        ctx.moveTo(m+c,m); ctx.lineTo(W-m-c,m); ctx.lineTo(W-m,m+c); ctx.lineTo(W-m,H-m-c); ctx.lineTo(W-m-c,H-m); ctx.lineTo(m+c,H-m); ctx.lineTo(m,H-m-c); ctx.lineTo(m,m+c); ctx.closePath(); ctx.stroke(); }
+      break;
+    }
+    case "celestial": {
+      for (const [x,y,k] of marginPoints(W,H,90,11)){ ctx.fillStyle=rgba(c1,.4+k*.5); ctx.beginPath(); ctx.arc(x,y,u*(.002+k*.004),0,Math.PI*2); ctx.fill(); }
+      for (const [x,y,k] of marginPoints(W,H,12,5)) sparkle(ctx,x,y,u*(.012+k*.02),c2);
+      ctx.fillStyle=c2; ctx.beginPath(); ctx.arc(W/2,u*.085,u*.045,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle=THEMES[t].paper; ctx.beginPath(); ctx.arc(W/2+u*.02,u*.075,u*.04,0,Math.PI*2); ctx.fill();
+      break;
+    }
+    case "limones": {
+      ctx.strokeStyle=c1; ctx.lineWidth=u*.003; ctx.strokeRect(u*.03,u*.03,W-u*.06,H-u*.06);
+      ctx.lineWidth=u*.0012; ctx.strokeRect(u*.042,u*.042,W-u*.084,H-u*.084);
+      for (const [x,y,sx,sy] of [[0,0,1,1],[W,H,-1,-1]]){
+        for (let i=0;i<6;i++) leaf(ctx,x+sx*u*.06,y+sy*u*.06,u*.15,Math.atan2(sy,sx)+(i-2.5)*.42,i%2?"#4f7a35":"#6b9a46");
+        lemon(ctx,x+sx*u*.1,y+sy*u*.06,u*.05,.4,c2); lemon(ctx,x+sx*u*.05,y+sy*u*.13,u*.045,-.8,c2); lemon(ctx,x+sx*u*.17,y+sy*u*.12,u*.04,1.2,c2); }
+      break;
+    }
+    case "talavera": {
+      const ts = u*.075, tile=(x,y)=>{ ctx.fillStyle="#fffdf8"; ctx.fillRect(x,y,ts,ts); ctx.strokeStyle=c1; ctx.lineWidth=u*.0015; ctx.strokeRect(x,y,ts,ts);
+        const cx=x+ts/2, cy=y+ts/2; ctx.fillStyle=c1;
+        for (const [qx,qy,a] of [[x,y,0],[x+ts,y,Math.PI/2],[x+ts,y+ts,Math.PI],[x,y+ts,Math.PI*1.5]]){ ctx.beginPath(); ctx.moveTo(qx,qy); ctx.arc(qx,qy,ts*.22,a,a+Math.PI/2); ctx.fill(); }
+        for (let k=0;k<4;k++){ ctx.save(); ctx.translate(cx,cy); ctx.rotate(k*Math.PI/2+Math.PI/4); ctx.beginPath(); ctx.ellipse(0,-ts*.17,ts*.08,ts*.15,0,0,Math.PI*2); ctx.fillStyle=c2; ctx.fill(); ctx.restore(); }
+        ctx.beginPath(); ctx.arc(cx,cy,ts*.09,0,Math.PI*2); ctx.fillStyle=c1; ctx.fill(); };
+      const nx = Math.ceil(W/ts), ny = Math.ceil(H/ts);
+      for (let i=0;i<nx;i++){ tile(i*ts,0); tile(i*ts,H-ts); }
+      for (let j=1;j<ny-1;j++){ tile(0,j*ts); tile(W-ts,j*ts); }
+      break;
+    }
+    case "otono": {
+      const cols=["#b03a2e","#d35400","#e67e22","#b9770e",c1];
+      for (const [x,y,k] of marginPoints(W,H,30,9)) maple(ctx,x,y,u*(.025+k*.03),k*6,cols[Math.floor(k*5)%5]);
+      break;
+    }
+    case "invierno": {
+      for (const [x,y,k] of marginPoints(W,H,26,4)) snowflake(ctx,x,y,u*(.012+k*.03),k>.5?c1:c2,u);
+      ctx.strokeStyle=rgba(c2,.8); ctx.lineWidth=u*.002; ctx.strokeRect(u*.035,u*.035,W-u*.07,H-u*.07);
+      break;
+    }
+    case "vintage": {
+      const m=u*.045, rr=u*.016; ctx.strokeStyle=c2; ctx.lineWidth=u*.0025;
+      const scallops=(x0,y0,x1,y1,a)=>{ const len=Math.hypot(x1-x0,y1-y0), n=Math.round(len/(rr*2)), dx=(x1-x0)/n, dy=(y1-y0)/n;
+        for(let i=0;i<n;i++){ ctx.beginPath(); ctx.arc(x0+dx*(i+.5),y0+dy*(i+.5),rr,a,a+Math.PI); ctx.stroke();
+          ctx.beginPath(); ctx.arc(x0+dx*(i+.5),y0+dy*(i+.5),rr*.25,0,Math.PI*2); ctx.fillStyle=c2; ctx.fill(); } };
+      scallops(m,m,W-m,m,Math.PI); scallops(W-m,m,W-m,H-m,-Math.PI/2); scallops(m,H-m,W-m,H-m,0); scallops(m,m,m,H-m,Math.PI/2);
+      ctx.setLineDash([u*.004,u*.008]); ctx.lineWidth=u*.0018; ctx.strokeRect(m+rr*2,m+rr*2,W-2*m-rr*4,H-2*m-rr*4); ctx.setLineDash([]);
+      break;
+    }
+    case "religioso": {
+      ctx.strokeStyle=c2; ctx.lineWidth=u*.003; ctx.strokeRect(u*.04,u*.04,W-u*.08,H-u*.08);
+      ctx.lineWidth=u*.0012; ctx.strokeRect(u*.052,u*.052,W-u*.104,H-u*.104);
+      const cx=W/2, cy=u*.12;
+      ctx.strokeStyle=rgba(c2,.5); ctx.lineWidth=u*.0018;
+      for(let i=0;i<24;i++){ const a=i*Math.PI/12; ctx.beginPath(); ctx.moveTo(cx+Math.cos(a)*u*.055,cy+Math.sin(a)*u*.055); ctx.lineTo(cx+Math.cos(a)*u*.085,cy+Math.sin(a)*u*.085); ctx.stroke(); }
+      ctx.fillStyle=c2; ctx.fillRect(cx-u*.007,cy-u*.05,u*.014,u*.1); ctx.fillRect(cx-u*.03,cy-u*.025,u*.06,u*.014);
+      break;
+    }
+    case "moderno": {
+      ctx.fillStyle=rgba(c2,.9); ctx.beginPath(); ctx.arc(W*.96,u*.02,u*.2,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle=rgba(c1,.08); ctx.beginPath(); ctx.arc(W*.02,H-u*.02,u*.16,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle=c1; ctx.lineWidth=u*.002; ctx.strokeRect(u*.05,u*.07,W-u*.12,H-u*.12);
+      break;
+    }
   }
   ctx.restore();
 }
 // Acento pequeño centrado sobre el texto (según el elemento gráfico elegido)
 function hasAccent(t,motif){
   return motif==="anillos" || motif==="eucalipto" && t!=="rustico" ||
-         ["rosas","peonias","girasoles","lavanda"].includes(motif) && t!=="floral" && t!=="deco";
+         ["rosas","peonias","girasoles","lavanda"].includes(motif) && !["floral","deco","celestial","religioso","limones","talavera"].includes(t);
 }
 function accent(ctx,x,y,u,t,motif,c1,c2){
   if (!hasAccent(t,motif)) return;
@@ -472,7 +652,8 @@ function accent(ctx,x,y,u,t,motif,c1,c2){
   else flower(ctx,x,y,u*.04,motif==="girasoles"?"#f2c230":motif==="lavanda"?"#9b87c9":c2,c1,motif==="girasoles"?12:6);
 }
 // Margen seguro (arriba/abajo) que deja cada estilo libre para el texto
-const SAFE = {clasico:.13, floral:.2, rustico:.19, minimal:.17, playa:.2, deco:.25};
+const SAFE = {clasico:.13, floral:.2, rustico:.19, minimal:.17, playa:.2, deco:.25, botanico:.12, boho:.2, acuarela:.17, marmol:.14,
+  celestial:.17, limones:.2, talavera:.2, otono:.15, invierno:.15, vintage:.15, religioso:.23, moderno:.24};
 
 // Foto de los novios recortada en círculo, arco o rectángulo
 function drawPhoto(ctx, img, cx, cy, s, frame, col, u){
@@ -526,7 +707,7 @@ function render(){
   const accentH = hasAccent(state.theme, state.motivo) && !bgImg && !coupleImg ? u*.09 : 0;
   const top = (bgImg ? H*.13 : u*SAFE[state.theme]) + (state.theme==="minimal" ? W*.12 : 0) + accentH;
   const avail = H - top - (bgImg ? H*.13 : u*SAFE[state.theme]);
-  const maxW = W * ({minimal:.62, floral:.62, playa:.62}[state.theme] || .7);
+  const maxW = W * ({minimal:.62, floral:.62, playa:.62, botanico:.6, boho:.62, limones:.62, acuarela:.64, talavera:.66}[state.theme] || .7);
 
   // Mide la altura total con una escala dada (el ajuste de líneas depende del tamaño)
   const layout = sc => {
@@ -560,7 +741,8 @@ function render(){
 function prompts(){
   const T = THEMES[state.theme], F = FORMATS[state.formato], M = MOTIFS[state.motivo];
   const col1 = colorName(state.c1 || T.c1), col2 = colorName(state.c2 || T.c2);
-  const extra = (state.extra||"").trim().replace(/\s+/g," ");
+  const extraEs = (state.extra||"").trim().replace(/\s+/g," ");
+  const extra = translateEs(extraEs);
   const chips = (state.chips||[]).filter(k=>CHIPS[k]);
   const V = VARIANTS[(state.variant||0) % VARIANTS.length];
   const ref = refInfo && $("refUse").checked ? refInfo : null;
@@ -581,10 +763,10 @@ function prompts(){
     ...(ref ? [`con el mismo estilo, colores y ambiente de la foto de ejemplo (${ref.mood.map(m=>m[1]).join(", ")})`] : []),
     V[1], F.es,
     "decoración solo en los bordes, gran espacio vacío en el centro para el texto, vista cenital, alta resolución, calidad de impresión, sin texto ni letras",
-    ...(extra ? [extra] : [])
+    ...(extraEs ? [extraEs] : [])
   ].join(", ") + ".";
   const neg = "text, letters, words, typography, writing, numbers, watermark, signature, logo, people, faces, blurry, low quality, jpeg artifacts, distorted, cluttered center";
-  const extraNote = extra && /[áéíóúñ¿¡]|\b(con|de|y|flores|estilo)\b/i.test(extra) ? "💡 Tu descripción está en español: la mayoría de IAs la entienden, pero en inglés suele dar mejores resultados." : "";
+  const extraNote = extra && extra !== extraEs ? `🌐 Tu descripción traducida al inglés: “${extra}”` : "";
   switch(tab){
     case "midjourney": {
       const sref = ref ? " --sref URL_DE_TU_FOTO" : "";
@@ -624,7 +806,188 @@ function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("sho
 function download(name, url){ const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
 function slug(){ return `invitacion-${(state.n1||"").trim()}-${(state.n2||"").trim()}`.toLowerCase().replace(/[^a-z0-9áéíóúñ-]+/g,"-"); }
 
+// ---------- Traductor básico español → inglés para la descripción ----------
+const ES_EN = {flor:"flower",flores:"flowers",rosa:"rose",rosas:"roses",hoja:"leaf",hojas:"leaves",rama:"branch",ramas:"branches",mariposa:"butterfly",mariposas:"butterflies",
+  paloma:"dove",palomas:"doves",corazon:"heart",corazones:"hearts",luz:"light",luces:"lights",velas:"candles",vela:"candle",castillo:"castle",jardin:"garden",bosque:"forest",
+  montana:"mountain",montanas:"mountains",lago:"lake",rio:"river",mar:"sea",playa:"beach",arena:"sand",sol:"sun",atardecer:"sunset",amanecer:"sunrise",luna:"moon",estrellas:"stars",
+  cielo:"sky",nubes:"clouds",fondo:"background",marco:"frame",borde:"border",bordes:"borders",esquinas:"corners",cinta:"ribbon",lazo:"bow",perlas:"pearls",encaje:"lace",
+  papel:"paper",textura:"texture",acuarela:"watercolor",dibujo:"drawing",dibujado:"drawn",mano:"hand",brillo:"glitter",brillos:"sparkles",oro:"gold",plata:"silver",cristal:"crystal",
+  orquideas:"orchids",tulipanes:"tulips",girasoles:"sunflowers",lirios:"lilies",margaritas:"daisies",hortensias:"hydrangeas",claveles:"carnations",gardenias:"gardenias",
+  olivo:"olive branch",trigo:"wheat",pampa:"pampas grass",helechos:"ferns",suculentas:"succulents",cactus:"cactus",palmeras:"palm trees",conchas:"seashells",olas:"waves",
+  iglesia:"church",hacienda:"hacienda",vino:"burgundy",cisnes:"swans",cisne:"swan",colibri:"hummingbird",colibries:"hummingbirds",aves:"birds",pajaros:"birds",
+  blanco:"white",blanca:"white",blancos:"white",blancas:"white",negro:"black",negra:"black",negros:"black",negras:"black",rojo:"red",roja:"red",rojos:"red",rojas:"red",
+  azul:"blue",azules:"blue",verde:"green",verdes:"green",amarillo:"yellow",amarilla:"yellow",amarillos:"yellow",amarillas:"yellow",rosado:"pink",rosada:"pink",rosados:"pink",rosadas:"pink",
+  morado:"purple",morada:"purple",morados:"purple",moradas:"purple",lila:"lilac",naranja:"orange",dorado:"golden",dorada:"golden",dorados:"golden",doradas:"golden",
+  plateado:"silver",plateada:"silver",celeste:"light blue",beige:"beige",crema:"cream",gris:"grey",turquesa:"turquoise",cafe:"brown",marron:"brown",
+  grande:"large",grandes:"large",pequeno:"small",pequena:"small",pequenos:"small",pequenas:"small",suave:"soft",suaves:"soft",delicado:"delicate",delicada:"delicate",delicadas:"delicate",
+  elegante:"elegant",elegantes:"elegant",romantico:"romantic",romantica:"romantic",moderno:"modern",moderna:"modern",antiguo:"antique",antigua:"antique",brillante:"shiny",
+  sencillo:"simple",sencilla:"simple",lujoso:"luxurious",lujosa:"luxurious",natural:"natural",magico:"magical",magica:"magical",tropical:"tropical",rustico:"rustic",rustica:"rustic",
+  colgantes:"hanging",secas:"dried",secos:"dried",frescas:"fresh",frescos:"fresh",pastel:"pastel",vintage:"vintage",bohemio:"boho",mucho:"lots of",muchas:"many",muchos:"many",
+  y:"and",o:"or",con:"with",sin:"without",en:"in",sobre:"on",entre:"between",alrededor:"around",arriba:"top",abajo:"bottom",centro:"center",lados:"sides",estilo:"style",tonos:"tones",
+  dos:"two",tres:"three",marino:"navy",colgante:"hanging",flotantes:"floating",guirnaldas:"garlands",arco:"arch",arcos:"arches",columpio:"swing",fuegos:"fireworks",artificiales:"",lentejuelas:"sequins"};
+const ES_ADJ = new Set(["white","black","red","blue","green","yellow","pink","purple","lilac","orange","golden","silver","light blue","beige","cream","grey","turquoise","brown",
+  "large","small","soft","delicate","elegant","romantic","modern","antique","shiny","simple","luxurious","natural","magical","tropical","rustic","hanging","dried","fresh","pastel","vintage","boho","burgundy"]);
+const ES_STOP = new Set(["quiero","queremos","quisiera","quisieramos","me","nos","gustaria","gusta","que","tenga","tengan","haya","sea","un","una","unos","unas","el","la","los","las",
+  "de","del","al","lo","por","favor","muy","mas","algo","tipo","poner","pon","ponle","agrega","agregar","anade","tambien","para","invitacion","boda","diseno","porfa","como","estilo",
+  "mejor","tantos","tantas","tanto","es","sera","son","colores","color","formato","confirmar","confirmacion","asistencia","rsvp","hagan","haz","hazla","hazlo","ahora","cambia","cambiar","usa","usar","ser","este","esta"]);
+const deaccent = t => t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+function translateEs(text){
+  if (!text) return "";
+  return text.split(/[.;\n]+/).map(sent => {
+    const toks = deaccent(sent).replace(/[^a-z0-9ñ\s-]/g," ").split(/\s+/).filter(w => w && !ES_STOP.has(w)).map(w => ES_EN[w] || w);
+    for (let i=0;i<toks.length-1;i++) if (!ES_ADJ.has(toks[i]) && ES_ADJ.has(toks[i+1]) && !["and","or","with","without","in","on"].includes(toks[i])) { [toks[i],toks[i+1]] = [toks[i+1],toks[i]]; i++; }
+    return toks.join(" ").replace(/^(and|with) /,"").trim();
+  }).filter(Boolean).join(", ");
+}
+
+// ---------- Chat: entiende lo que la persona escribe y actualiza el diseño ----------
+const COLORS_ES = [["azul marino","#1b2a49"],["rosa palo","#e3bcbc"],["verde salvia","#9caf88"],["verde esmeralda","#1f7a5a"],["verde oliva","#6b7a3a"],["azul cielo","#8ec5e8"],
+  ["vino","#722f37"],["burdeos","#722f37"],["borgona","#722f37"],["rojo","#b22234"],["fucsia","#c2185b"],["rosado","#e8a0b4"],["rosa","#e8a0b4"],["coral","#f08070"],
+  ["morado","#5b2a86"],["purpura","#5b2a86"],["lila","#b9a3d6"],["lavanda","#b9a3d6"],["azul","#1f4e8c"],["celeste","#8ec5e8"],["turquesa","#2a9d8f"],["menta","#a8dcc5"],
+  ["salvia","#9caf88"],["esmeralda","#1f7a5a"],["oliva","#6b7a3a"],["verde","#4f7942"],["mostaza","#d4a017"],["amarillo","#f2c94c"],["naranja","#e07a2f"],["terracota","#c46a4a"],
+  ["durazno","#f4b183"],["melocoton","#f4b183"],["champan","#e6d3a3"],["champagne","#e6d3a3"],["dorado","#c9a24b"],["oro","#c9a24b"],["plateado","#a8a9ad"],["plata","#a8a9ad"],
+  ["beige","#d8c3a5"],["nude","#d8c3a5"],["cafe","#6b4423"],["marron","#6b4423"],["chocolate","#5a3825"],["negro","#111111"],["gris","#8a8a8a"]];
+const MOTIF_KW = {rosas:["rosas"],peonias:["peonia"],eucalipto:["eucalipto"],girasoles:["girasol"],lavanda:["ramas de lavanda","ramitas de lavanda","flores de lavanda"],anillos:["anillo","argolla"],palmeras:["palmera"],geometrico:["geometri"]};
+const CHIP_KW = {elegante:["elegant","sofisticad","refinad"],colorido:["colorid","alegre","vivos"],pastel:["suave","pastel","delicad"],flores:["mas flores","muchas flores","florido","llena de flores"],
+  minimal:["menos adornos","sin tantos adornos","sin adornos","pocos adornos","sencill","simple","limpi"],luz:["luminos","brillante","mas luz"],acuarela:["acuarela"],realista:["realista","foto real","fotografi"],dorado:["dorad","foil"],vintage:["vintage","retro","antigu"]};
+const MONTHS = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const has = (txt, kw) => new RegExp("(^|[^a-z])" + kw.replace(/ /g,"\\s+")).test(txt);
+const cap = w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+let chatHistory = [];
+
+function interpret(raw){
+  const done = [], data = {};
+  let rest = raw;
+  const take = (re, fn) => { const m = rest.match(re); if (m){ fn(m); rest = rest.replace(m[0], " "); return true; } return false; };
+  const t0 = deaccent(raw);
+
+  // Comandos
+  if (/^(ayuda|help|\?|que puedes hacer|como funciona)/.test(t0.trim())) return {help:true};
+  if (/(reinicia|empezar de nuevo|borra(r)? todo|desde cero)/.test(t0)){ state.chips=[]; $("extra").value=""; state.variant=0; done.push("Borré los ajustes y la descripción"); return {done}; }
+  if (/(borra|limpia|quita)(r)? (la )?descripcion/.test(t0)){ $("extra").value=""; done.push("Borré la descripción"); return {done}; }
+  let cmd = false;
+  if (/(otra (variacion|opcion|version|idea|propuesta)|no me gusta|dame otr|cambia(lo)? un poco)/.test(t0)){ state.variant=((state.variant||0)+1)%VARIANTS.length; done.push(`Nueva variación (${state.variant+1} de ${VARIANTS.length})`); cmd = true; }
+  for (const [k,re] of [["midjourney",/midjourney/],["dalle",/(dall|chatgpt|chat gpt|openai)/],["sd",/(stable diffusion|stable|sdxl)/],["es",/(en espanol|generico)/]])
+    if (re.test(t0)){ tab=k; document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("on",x.dataset.t===k)); done.push("Prompt para " + document.querySelector(`#tabs [data-t=${k}]`).textContent); cmd = true; break; }
+  const wantsPrompt = /(prompt|dame el|muestrame|ver el)/.test(t0);
+
+  // Datos del evento (se quitan del texto para no confundirlos con estilos)
+  take(/(?:nos llamamos|somos|los novios son|novios:?|se casan|nombres:?)\s+([a-záéíóúñü]+)\s+(?:y|e|&)\s+([a-záéíóúñü]+)/i, m => { data.n1=cap(m[1]); data.n2=cap(m[2]); });
+  take(/(?:ceremonia|misa|boda civil)\s+(?:ser[aá]\s+|es\s+)?(?:en\s+)?(?:la\s+|el\s+)?([^.,;\n]+?)(?=\s+y\s+(?:la\s+)?(?:recepci|fiesta)|[.,;\n]|$)/i, m => data.ceremonia=m[1].trim());
+  take(/(?:recepci[oó]n|fiesta|celebraci[oó]n|banquete)\s+(?:ser[aá]\s+|es\s+)?(?:en\s+)?(?:la\s+|el\s+)?([^.,;\n]+?)(?=\s+y\s+|[.,;\n]|$)/i, m => data.recepcion=m[1].trim());
+  take(/(?:vestimenta|dress ?code|c[oó]digo de vestimenta)\s*(?:es|:|ser[aá])?\s*([^.,;\n]+)/i, m => data.dress=cap(m[1].trim()));
+  take(/(?:mensaje(?: final)?|frase final)\s*(?:es|:|que diga|diga)?\s*["“]?([^"”\n]+)["”]?/i, m => data.mensaje=m[1].trim());
+  take(/(?:introducci[oó]n|frase de arriba|frase inicial)\s*(?:es|:|que diga|diga)?\s*["“]?([^"”\n]+)["”]?/i, m => data.intro=m[1].trim());
+  take(/(\+?\d[\d\s-]{7,}\d)/, m => data.rsvp = "RSVP: " + m[1].trim());
+  take(/(\d{1,2})\s+de\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)(?:\s+(?:de|del)\s+(\d{4}))?/i, m => {
+    const mo = MONTHS.indexOf(m[2].toLowerCase().replace("setiembre","septiembre")); const now = new Date();
+    let y = m[3] ? +m[3] : now.getFullYear(); if (!m[3] && new Date(y,mo,+m[1]) < now) y++;
+    data.fecha = `${y}-${String(mo+1).padStart(2,"0")}-${String(+m[1]).padStart(2,"0")}`; });
+  take(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/, m => data.fecha = `${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`);
+  take(/(?:a las|hora:?|a la)\s*(\d{1,2})(?::(\d{2}))?\s*(a\.?\s?m\.?|p\.?\s?m\.?|de la tarde|de la noche|de la ma[ñn]ana|del mediod[ií]a)?/i, m => {
+    let h = +m[1]; const mer = deaccent(m[3]||"");
+    if ((/p|tarde|noche/.test(mer) || (!mer && h <= 8)) && h < 12) h += 12; if (/a\.?\s?m|manana/.test(mer) && h === 12) h = 0;
+    data.hora = `${String(h).padStart(2,"0")}:${m[2]||"00"}`; });
+  for (const [k,v] of Object.entries(data)) $(k).value = v;
+  const labels = {n1:"Novios",fecha:"Fecha",hora:"Hora",ceremonia:"Ceremonia",recepcion:"Recepción",dress:"Vestimenta",mensaje:"Mensaje",intro:"Introducción",rsvp:"Confirmación"};
+  for (const k of Object.keys(labels)) if (data[k]) done.push(`${labels[k]}: ${k==="n1" ? data.n1+" & "+data.n2 : k==="fecha" ? fmtFecha(data.fecha) : k==="hora" ? fmtHora(data.hora) : data[k]}`);
+
+  // Diseño: estilo, elemento, colores, formato y ajustes
+  const t = deaccent(rest);
+  let design = false; const used = [];
+  const theme = Object.entries(THEME_KW).find(([k,kws]) => kws.some(kw => has(t,kw)));
+  const kwHit = list => list.filter(kw => has(t,kw));
+  if (theme){ used.push(...kwHit(theme[1])); state.theme = theme[0]; done.push("Estilo: " + THEMES[theme[0]].name); design = true; }
+  const motif = Object.entries(MOTIF_KW).find(([k,kws]) => kws.some(kw => has(t,kw)));
+  if (motif){ used.push(...kwHit(motif[1])); $("motivo").value = motif[0]; done.push("Elemento: " + $("motivo").selectedOptions[0].text); design = true; }
+  if (/(cuadrad|instagram|post)/.test(t)){ $("formato").value="cuadrado"; done.push("Formato cuadrado"); design = true; }
+  else if (/(historia|estado|whatsapp|story|celular)/.test(t)){ $("formato").value="historia"; done.push("Formato historia 9:16"); design = true; }
+  else if (/(imprimir|impresa|tarjeta|5x7)/.test(t)){ $("formato").value="vertical"; done.push("Formato tarjeta 5×7"); design = true; }
+  used.push("cuadrad","instagram","post","historia","estado","whatsapp","story","celular","imprimir","impresa","tarjeta","5x7");
+  // Colores en el orden en que aparecen ("rosas" son flores, no color)
+  const found = []; let tc = t.replace(/\brosas\b/g," ");
+  for (const [name,hex] of COLORS_ES){ const re = new RegExp("(^|[^a-z])("+name+"(?:s|a|as|os)?)(?![a-z])", "g"); let m;
+    while ((m = re.exec(tc))){
+      const prev = tc.slice(0, m.index + m[1].length).trim().split(/\s+/).pop() || "";
+      const isAttr = (ES_EN[prev] && !ES_ADJ.has(ES_EN[prev]) && !["and","or","with","in","without"].includes(ES_EN[prev])) || ES_ADJ.has(ES_EN[prev]||"");
+      if (!isAttr){ found.push({name, hex, i:m.index}); used.push(m[2]); }
+      tc = tc.slice(0, m.index) + " ".repeat(m[0].length) + tc.slice(m.index + m[0].length);
+    } }
+  const seen = new Set(); for (let i=found.length-1;i>=0;i--){ if (seen.has(found[i].hex)) found.splice(i,1); else seen.add(found[i].hex); }
+  found.sort((a,b)=>a.i-b.i);
+  if (theme) { $("c1").value = THEMES[theme[0]].c1; $("c2").value = THEMES[theme[0]].c2; }
+  if (found.length >= 2){ const [a,b] = found; const [d,l] = isDark(a.hex) || !isDark(b.hex) && hexToRgb(a.hex).reduce((x,y)=>x+y) < hexToRgb(b.hex).reduce((x,y)=>x+y) ? [a,b] : [b,a];
+    $("c1").value = d.hex; $("c2").value = l.hex; done.push(`Colores: ${d.name} y ${l.name}`); design = true; }
+  else if (found.length === 1){ const f = found[0]; if (isDark(f.hex)) $("c1").value = f.hex; else $("c2").value = f.hex; done.push("Color: " + f.name); design = true; }
+  // Ajustes rápidos (con "sin"/"quita"/"menos" se desactivan)
+  for (const [k,kws] of Object.entries(CHIP_KW)){
+    const neg = kws.some(kw => new RegExp("(sin|quita|quitar|no|menos)\\s+(\\w+\\s+)?"+kw).test(t)) && k!=="minimal";
+    if (neg && state.chips.includes(k)){ state.chips = state.chips.filter(x=>x!==k); done.push("Quité: " + CHIPS[k][0]); design = true; }
+    else if (!neg && kws.some(kw => has(t,kw)) && !state.chips.includes(k)){ state.chips.push(k); done.push("Ajuste: " + CHIPS[k][0]); design = true; }
+    used.push(...kwHit(kws));
+  }
+  if (/(sin|menos|quita(r)?)\s+flores/.test(t) && state.chips.includes("flores")){ state.chips = state.chips.filter(x=>x!=="flores"); done.push("Quité: Más flores"); }
+
+  // Lo que pidieron con sus palabras se agrega a la descripción del prompt
+  const toks = rest.replace(/[“”"()¿?¡!]/g," ").split(/\s+/).filter(Boolean), dt = toks.map(w => deaccent(w).replace(/[^a-z0-9ñ]/g,""));
+  const drop = new Array(toks.length).fill(false);
+  for (const kw of used){ const parts = deaccent(kw).split(/\s+/);
+    for (let i=0;i+parts.length<=dt.length;i++) if (parts.every((pt,j) => j===parts.length-1 ? dt[i+j].startsWith(pt) : dt[i+j]===pt)) for (let j=0;j<parts.length;j++) drop[i+j]=true; }
+  const CONN = new Set(["y","e","o","con","sin","de","en","a","al","la","el","los","las","un","una"]);
+  let keep = toks.map((w,i) => ({w: w.replace(/[,.;:]+$/,""), d: dt[i]})).filter((x,i) => !drop[i] && x.d && !ES_STOP.has(x.d));
+  keep = keep.filter((x,i,a) => !(CONN.has(x.d) && (i===0 || i===a.length-1 || CONN.has(a[i+1]?.d))));
+  while (keep.length && CONN.has(keep[0].d)) keep.shift();
+  while (keep.length && CONN.has(keep[keep.length-1].d)) keep.pop();
+  const wish = keep.map(x=>x.w).join(" ");
+  const wishTokens = keep.filter(x => !CONN.has(x.d) && x.d.length > 2);
+  const onlyCommand = (cmd || wantsPrompt) && wishTokens.length <= 3;
+  if (wish && wishTokens.length && !onlyCommand){
+    const cur = $("extra").value.trim();
+    if (!deaccent(cur).includes(deaccent(wish))){ $("extra").value = cur ? cur.replace(/[.\s]+$/,"") + ". " + wish : wish; done.push(`Agregué a la descripción: “${wish}”`); }
+  }
+  return {done, showPrompt: true};
+}
+
+function addMsg(who, html){
+  const d = document.createElement("div"); d.className = "msg " + who; d.innerHTML = html;
+  $("chatLog").appendChild(d); $("chatLog").scrollTop = $("chatLog").scrollHeight; return d;
+}
+const esc = t => t.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const HELP = `¡Hola! 👋 Cuéntame cómo sueñas tu invitación y yo la diseño y escribo el prompt para la IA de imágenes.
+
+Puedes escribirme cosas como:
+• “Nos llamamos Ana y Luis, la boda es el 5 de mayo de 2027 a las 4 pm”
+• “Quiero estilo playa con azul y dorado y mariposas”
+• “Algo elegante en mármol, sin tantos adornos”
+• “La ceremonia en la Parroquia San José y la recepción en Hacienda El Roble”
+• “Dame otra variación” o “dame el prompt para ChatGPT”
+
+Estilos: ${Object.values(THEMES).map(x=>x.name).join(", ")}.`;
+const SUGS = ["Quiero algo romántico con flores rosadas","Estilo playa con azul y dorado","Elegante en mármol y oro","Celestial con estrellas","Boho terracota con pampa","Otra variación","Dame el prompt para ChatGPT"];
+
+function chatReply(text){
+  addMsg("me", esc(text));
+  const r = interpret(text);
+  if (r.help){ addMsg("bot", esc(HELP)); return; }
+  sync();
+  const p = prompts();
+  const tabName = document.querySelector(`#tabs [data-t=${tab}]`).textContent;
+  const lines = r.done.length ? "Listo ✓\n" + r.done.map(x=>"• "+x).join("\n") : "No encontré cambios concretos, pero aquí tienes tu prompt actual.";
+  const m = addMsg("bot", esc(lines) + `\n\nPrompt para ${esc(tabName)}:<pre>${esc(p.pos)}</pre><button class="mini primary">Copiar prompt</button> <button class="mini">Otra variación</button>`);
+  const [bCopy, bVar] = m.querySelectorAll("button");
+  bCopy.onclick = async () => { try { await navigator.clipboard.writeText(p.pos); toast("Copiado ✓"); } catch(e){ toast("Selecciona el texto y cópialo"); } };
+  bVar.onclick = () => chatReply("Otra variación");
+  chatHistory.push(text);
+}
+function buildChat(){
+  addMsg("bot", esc(HELP)); $("chatLog").scrollTop = 0;
+  for (const sgt of SUGS){ const b = document.createElement("button"); b.type="button"; b.className="sug"; b.textContent=sgt; b.onclick=()=>chatReply(sgt); $("chatSugs").appendChild(b); }
+  $("chatForm").onsubmit = e => { e.preventDefault(); const v = $("chatIn").value.trim(); if (!v) return; $("chatIn").value = ""; chatReply(v); };
+  $("chatIn").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey){ e.preventDefault(); $("chatForm").requestSubmit(); } });
+}
+
 buildThemeButtons();
+buildChat();
 $("c1").value = THEMES.clasico.c1; $("c2").value = THEMES.clasico.c2;
 try { const saved = JSON.parse(localStorage.getItem("invitacion-boda")||"null"); if (saved) writeForm(saved); } catch(e){}
 
@@ -660,7 +1023,7 @@ $("loadJson").onchange = async e => { const f=e.target.files[0]; if(!f) return;
   try { writeForm(JSON.parse(await f.text())); sync(); toast("Proyecto cargado"); } catch(err){ toast("Archivo no válido"); } };
 
 // Espera a las fuentes para que el lienzo use las tipografías correctas
-const fontsToLoad = ['40px "Great Vibes"','40px "Playfair Display"','italic 40px "Playfair Display"','40px "Cormorant Garamond"','600 40px "Cormorant Garamond"','40px "Josefin Sans"','40px "Poiret One"'];
+const fontsToLoad = ['40px "Cinzel"','600 40px "Cinzel"','40px "Parisienne"','40px "Pinyon Script"','40px "Alex Brush"','40px "Lora"','600 40px "Lora"','italic 40px "Lora"','40px "Great Vibes"','40px "Playfair Display"','italic 40px "Playfair Display"','40px "Cormorant Garamond"','600 40px "Cormorant Garamond"','40px "Josefin Sans"','40px "Poiret One"'];
 sync();
 Promise.all(fontsToLoad.map(f => document.fonts.load(f).catch(()=>{}))).then(() => render());
 </script>

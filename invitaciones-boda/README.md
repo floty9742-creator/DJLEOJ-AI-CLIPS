@@ -7,7 +7,15 @@ No requiere instalación: abre `index.html` en el navegador.
 ## Funciones
 
 - **Datos del evento:** nombres, frase de introducción, fecha, hora, ceremonia, recepción, vestimenta, mensaje y confirmación de asistencia (RSVP).
-- **6 estilos:** Clásico, Floral, Rústico, Minimal, Playa y Art déco, con decoraciones dibujadas automáticamente.
+- **💬 Asistente de diseño (chat):** escribe en español lo que deseas y la invitación y el prompt se actualizan solos. Entiende:
+  - nombres, fecha, hora, ceremonia, recepción, vestimenta, mensaje y teléfono de confirmación
+    (“Nos llamamos Ana y Luis, la boda es el 5 de mayo de 2027 a las 4 pm”);
+  - estilo, colores, elemento, formato y ajustes (“estilo playa con azul marino y dorado”, “más elegante y sin tantos adornos”, “para WhatsApp”);
+  - ideas libres, que se agregan al prompt y se traducen al inglés (“flores blancas con hojas verdes colgantes y luces” → *white flowers with green leaves hanging and lights*);
+  - comandos como “otra variación” o “dame el prompt para ChatGPT”.
+- **18 estilos** con decoraciones dibujadas automáticamente, inspirados en las tendencias más populares de invitaciones de boda:
+  Clásico, Floral, Rústico, Minimal, Playa, Art déco, Botánico, Boho, Acuarela, Mármol y oro, Celestial, Mediterráneo (limones),
+  Talavera, Otoño, Invierno, Vintage (encaje), Religioso y Editorial (moderno).
 - **Elementos gráficos:** rosas, peonías, eucalipto, girasoles, lavanda, anillos, palmeras y geometría.
 - **3 formatos:** tarjeta 5×7 (1500×2100 px), cuadrado para Instagram (1080×1080) e historia 9:16 para WhatsApp/IG (1080×1920).
 - **Colores personalizables:** color principal y color de acento.
