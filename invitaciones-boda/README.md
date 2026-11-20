@@ -4,6 +4,16 @@ Aplicación web para diseñar invitaciones de matrimonio y generar **prompts de 
 
 No requiere instalación: abre `index.html` en el navegador.
 
+## 🌍 Idiomas: Español · Italiano · Português
+
+Con los botones de arriba se cambia todo al idioma elegido:
+- la interfaz completa (botones, títulos, avisos);
+- el texto de la invitación: fecha (*Sábado, 12 de junio de 2027* / *Mercoledì 5 maggio 2027* / *Quarta-feira, 5 de maio de 2027*), hora (*5:00 p. m.* / *ore 17:00* / *17h*), etiquetas y frases de ejemplo;
+- el chat, que entiende mensajes en los tres idiomas (“Ci chiamiamo Giulia e Marco…”, “Quero estilo praia com azul e dourado…”);
+- el prompt en el idioma de la persona (pestaña Español / Italiano / Português). Los prompts para Midjourney, Stable Diffusion y DALL·E siguen en inglés porque así dan mejores resultados, y la descripción libre se traduce automáticamente.
+
+La app recuerda el idioma elegido y, la primera vez, usa el idioma del navegador.
+
 ## Funciones
 
 - **Datos del evento:** nombres, frase de introducción, fecha, hora, ceremonia, recepción, vestimenta, mensaje y confirmación de asistencia (RSVP).
