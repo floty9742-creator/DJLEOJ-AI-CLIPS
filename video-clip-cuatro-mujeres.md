@@ -16,7 +16,7 @@ Canción: 130 s. Los tiempos son aproximados (sacados de la transcripción); aj�
 5. **Monta en CapCut/DaVinci** con la canción original encima; corta al ritmo. El lip-sync se hace con Kling (función Lip Sync, sube el clip + el fragmento de audio) solo en los primeros planos del cantante.
 
 ## Estilo visual (pégalo al final de cada prompt)
-`cinematic music video, Latin urban, neon night city, warm tungsten and magenta/cyan neon lights, shallow depth of field, 35mm, handheld camera, vibrant colors, 9:16 vertical` (cambia a 16:9 si es para YouTube)
+`cinematic music video, Latin urban, neon night city, warm tungsten and magenta/cyan neon lights, shallow depth of field, 35mm, handheld camera, vibrant colors, 16:9 widescreen`
 
 ## Shot list
 
