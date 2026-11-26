@@ -41,3 +41,33 @@ Canción: 130 s. Los tiempos son aproximados (sacados de la transcripción); aj�
 - Si Flow/Veo no respeta la cara, repite con la misma imagen de ingrediente y añade "same character as reference".
 - Kling es mejor para movimiento y baile; Flow/Veo para planos cinematográficos y escenarios.
 - Evita pedir que salga texto en pantalla dentro del clip; ponlo al montar.
+
+---
+
+# Prompts finales para pegar (16 clips de 8 s = 2:08, + título final en el editor)
+
+Personajes = tus imágenes de referencia (Ingredients): SINGER, W1 (plateado/luna), W2 (rojo), W3 (neón/fiesta), W4 (chef).
+
+**Pega esto al FINAL de cada prompt (SUFIJO):**
+`16:9 widescreen, cinematic Latin urban music video, neon lights, shallow depth of field, 35mm. No dialogue, no speech, no singing, mouth closed, no lyrics, no text on screen. Keep the characters identical to the reference images.`
+
+Clips marcados **[LIPSYNC]**: genéralos con la boca cerrada y luego pásalos por Kling Lip Sync con el fragmento de audio de la canción.
+
+1. (0:00) SINGER walks toward the camera on a night avenue counting on his fingers, W1 W2 W3 W4 waiting as silhouettes under streetlights behind him, car radio glow.
+2. (0:08) Camera pushes through the doors of a packed nightclub, neon sign, DJ booth, crowd cheering, SINGER entering with confidence.
+3. (0:16) **[LIPSYNC: "Yo tengo cuatro mujeres enamoradas de mí"]** Medium close-up of SINGER in the club looking straight at camera, flashing lights, the four women appearing one by one behind him.
+4. (0:24) Overhead shot, SINGER in the center and W1 W2 W3 W4 forming a circle around him, camera slowly rotating, confetti falling.
+5. (0:32) SINGER and W1 on a rooftop at night, giant moon behind them, dreamy silver light, slow dolly-in, romantic.
+6. (0:40) W2 dancing in intense red lighting, hair and dress moving, SINGER watching and smiling, dynamic handheld camera.
+7. (0:48) W3 dancing on a nightclub floor as dawn light breaks through the windows, golden-pink glow, SINGER dancing next to her.
+8. (0:56) W4 cooking in a warm kitchen wearing an apron, smiling at SINGER, who tastes the food and winks at camera.
+9. (1:04) Comic montage: W1 whispers in SINGER's ear, W2 hugs him from behind, W3 fixes his collar, W4 serves him food, playful tone.
+10. (1:12) Pool party at night, the four women playfully push SINGER into the pool, slow-motion water splash, laughter.
+11. (1:20) SINGER alone on a couch looking nervously at his phone, four notifications lighting up the screen, comic worried face, dim room.
+12. (1:28) Rooftop at sunset, SINGER and the four women dancing together in sync, drone shot slowly pulling back, warm orange sky.
+13. (1:36) Vintage opera stage with red velvet curtains, a performer in Don Giovanni costume with a cape, dramatic spotlight, theatrical gag moment.
+14. (1:44) Fast flash cuts of the four women's faces with large glowing neon number 4 shapes, rhythmic, strobing colors.
+15. (1:52) **[LIPSYNC: "Cuatro, cuatro, cuatro mujeres"]** Close-up of SINGER rapping to camera, arms spread, neon lights behind him.
+16. (2:00) SINGER laughs to camera surrounded by the four women, then holds a freeze-like pose, confetti, warm light. (Corta a 2:10 y pon el título "CUATRO MUJERES" en el editor.)
+
+Orden de uso: genera los 16, silencia el audio de todos, une en el orden y pon la canción original encima. Recorta el último clip para terminar en 2:10.
