@@ -1,0 +1,7 @@
+LOGOTIPO OFICIAL
+El logotipo que aparece en demo-montaggio-v5-logo-intro.mp4 está DIBUJADO POR CÓDIGO y es una aproximación, no el archivo oficial.
+Antes de mostrarlo a IKEA conviene usar el logotipo oficial (pídelo a IKEA o a su zona de prensa/marca):
+1. Guarda el archivo como logo.svg junto a demo-montaggio-v5.html (misma carpeta).
+2. La animación lo detecta sola y lo usa en lugar del dibujo.
+3. Vuelve a renderizar (o pídeselo a Claude).
+Uso privado: solo para enseñárselo a la propia empresa. No lo publiques.
