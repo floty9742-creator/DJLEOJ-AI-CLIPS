@@ -5,9 +5,16 @@
         "source": "github",
         "repo": "affaan-m/ECC"
       }
+    },
+    "motionsites": {
+      "source": {
+        "source": "github",
+        "repo": "Motionsites-AI/claude-skill"
+      }
     }
   },
   "enabledPlugins": {
-    "ecc@ecc": true
+    "ecc@ecc": true,
+    "motionsites-web-builder@motionsites": true
   }
 }
