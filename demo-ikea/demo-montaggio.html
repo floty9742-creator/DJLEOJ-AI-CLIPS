@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><title>Demo montaggio</title>
+<style>
+:root{--ink:#1f2933;--acc:#0f9d8a;--warn:#d64545;--bg:#e9e7e2}
+*{box-sizing:border-box;margin:0}
+html,body{width:1280px;height:720px;overflow:hidden;background:var(--bg);font-family:"DejaVu Sans","Liberation Sans",Arial,sans-serif;color:var(--ink)}
+#view{position:absolute;inset:0}
+#tag{position:absolute;left:28px;top:22px;font-size:15px;letter-spacing:1px;color:#5d6770;background:rgba(255,255,255,.7);padding:8px 14px;border-radius:8px}
+#bar{position:absolute;left:28px;right:28px;bottom:26px;height:132px;background:rgba(255,255,255,.94);border-radius:18px;display:flex;align-items:center;gap:22px;padding:0 28px;box-shadow:0 8px 30px rgba(0,0,0,.12)}
+#num{flex:none;width:76px;height:76px;border-radius:50%;background:var(--ink);color:#fff;font-size:38px;font-weight:800;display:flex;align-items:center;justify-content:center}
+#txt{flex:1}#txt small{font-size:15px;color:var(--acc);font-weight:800;letter-spacing:2px}
+#txt h2{font-size:32px;margin:3px 0 4px}#txt p{font-size:19px;color:#4b5560;line-height:1.3}
+#tools{display:flex;gap:12px}
+.tool{width:104px;height:92px;border-radius:12px;background:#f2f1ed;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700}
+.tool svg{width:48px;height:40px}
+#warn{position:absolute;left:28px;right:28px;bottom:170px;background:var(--warn);color:#fff;font-size:22px;font-weight:800;padding:13px 22px;border-radius:12px;display:none}
+#title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:linear-gradient(160deg,#1f2933,#2f3d4a);color:#fff;gap:18px}
+#title h1{font-size:68px;line-height:1.1}#title h1 em{font-style:normal;color:#5fe0c8}#title p{font-size:26px;color:#c4ccd4}
+#list{position:absolute;left:28px;top:80px;width:360px;background:rgba(255,255,255,.94);border-radius:16px;padding:22px 24px;font-size:19px;line-height:1.7;display:none}
+#list h3{font-size:16px;color:var(--acc);letter-spacing:2px;margin-bottom:6px}
+#list b{display:inline-block;width:30px;color:#6b7782}
+#qrc{position:absolute;right:40px;top:90px;width:360px;background:#fff;border-radius:18px;padding:24px;text-align:center;box-shadow:0 10px 36px rgba(0,0,0,.18);display:none}
+#qrc img{width:250px;height:250px}#qrc h3{font-size:24px;margin:12px 0 6px}#qrc p{font-size:16px;color:#4b5560;line-height:1.35}
+#end{position:absolute;inset:0;background:linear-gradient(160deg,#1f2933,#2f3d4a);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center}
+#end h1{font-size:60px}#end .row{display:flex;gap:26px}#end .k{background:rgba(255,255,255,.1);border-radius:16px;padding:22px 26px;width:300px;font-size:24px;line-height:1.3}
+#end .k b{display:block;font-size:44px;color:#5fe0c8}
+#end small{font-size:15px;color:#9aa6b2;max-width:900px}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/examples/jsm/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script></head><body>
+<div id="view"></div>
+<div id="tag">DEMO CONCETTO · prodotto generico · non è materiale ufficiale</div>
+<div id="list"></div><div id="qrc"><img src="qr-demo.png"><h3>Scansiona il QR</h3><p>sul manuale: il video di montaggio di questo prodotto, passo dopo passo.</p></div>
+<div id="warn"></div>
+<div id="bar"><div id="num">1</div><div id="txt"><small id="k"></small><h2 id="h"></h2><p id="p"></p></div><div id="tools"></div></div>
+<div id="title"><h1>Ogni prodotto,<br><em>il suo video di montaggio</em></h1><p>Un codice QR sul manuale. Montaggio chiaro, passo dopo passo.</p></div>
+<div id="end"><h1>Montare bene, al primo tentativo</h1><div class="row"><div class="k"><b>−</b>errori di montaggio</div><div class="k"><b>−</b>chiamate al servizio clienti</div><div class="k"><b>−</b>resi e riparazioni</div></div><small>Idea di concetto. Dati di impatto da misurare in un progetto pilota. Prodotto generico, senza materiali di terzi.</small></div>
+<script type="module">
+import * as THREE from 'three';
+import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
+import {RoundedBoxGeometry} from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import {buildDrill} from './modelo-taladro.js';
+const W=1280,H=720,END=48;
+const R=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});R.setPixelRatio(1);R.setSize(W,H);R.setClearColor(0xe9e7e2);
+R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.0;R.outputColorSpace=THREE.SRGBColorSpace;R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
+document.getElementById('view').appendChild(R.domElement);
+const sc=new THREE.Scene();sc.background=new THREE.Color(0xe9e7e2);
+const cam=new THREE.PerspectiveCamera(32,W/H,.1,50);
+const pm=new THREE.PMREMGenerator(R);sc.environment=pm.fromScene(new RoomEnvironment(),.04).texture;sc.environmentIntensity=.8;
+const key=new THREE.DirectionalLight(0xffffff,2.2);key.position.set(3,5,4);key.castShadow=true;key.shadow.mapSize.set(2048,2048);
+Object.assign(key.shadow.camera,{left:-4,right:4,top:4,bottom:-4,near:1,far:20});key.shadow.radius=5;key.shadow.bias=-.0004;sc.add(key);
+const fillL=new THREE.DirectionalLight(0xdbe7ff,.6);fillL.position.set(-3,2,3);sc.add(fillL);
+const floor=new THREE.Mesh(new THREE.CircleGeometry(9,64),new THREE.MeshStandardMaterial({color:0xdedbd4,roughness:.95}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;sc.add(floor);
+const WHITE=new THREE.MeshStandardMaterial({color:0xf4f3ef,roughness:.55}),WOOD=new THREE.MeshStandardMaterial({color:0xd9b98a,roughness:.7}),STEEL=new THREE.MeshStandardMaterial({color:0xaeb4bb,roughness:.3,metalness:1});
+const bed=new THREE.Group();sc.add(bed);
+const parts=[];let idx=0;
+function P(step,mat,w,h,d,x,y,z,from){const m=new THREE.Mesh(new RoundedBoxGeometry(w,h,d,3,Math.min(w,h,d)*.18),mat);m.castShadow=m.receiveShadow=true;bed.add(m);
+ const o={m,step,fin:new THREE.Vector3(x,y,z),from:new THREE.Vector3(...(from||[Math.sign(x||.3)*.9,.9+(idx%4)*.15,(z||.01)*.45+(idx%2?.25:-.25)])),i:idx++};parts.push(o);return o}
+// paso 1: montantes y traviesas
+for(const sx of[-1,1])for(const sz of[-1,1])P(1,WHITE,.09,1.7,.09,sx*.5,.85,sz*1.0);
+for(const sx of[-1,1])P(1,WHITE,.04,.2,2.0,sx*.5,1.2,0);
+for(const sz of[-1,1])P(1,WHITE,1.0,.2,.04,0,1.2,sz*1.0);
+// paso 2: listones
+for(let i=0;i<12;i++)P(2,WOOD,.86,.02,.07,0,1.13,-.9+i*.164,[0,1.0+(i%3)*.15,(i-5.5)*.12]);
+P(2,WOOD,.03,.05,1.9,-.455,1.1,0,[-.6,1.2,0]);P(2,WOOD,.03,.05,1.9,.455,1.1,0,[.6,1.2,0]);
+// paso 3: escalera y protección
+for(const sx of[-1,1])P(3,WHITE,.04,1.3,.04,sx*.18,.65,1.08,[sx*.8,.8,.6]);
+for(let i=0;i<4;i++)P(3,WOOD,.36,.035,.05,0,.28+i*.26,1.08,[0,.7+i*.1,.9+i*.1]);
+P(3,WHITE,.03,.12,1.4,.5,1.5,-.15,[.9,.9,0]);
+// paso 4: escritorio
+P(4,WHITE,.03,.75,.6,.44,.375,-.55,[.9,.4,-.4]);P(4,WHITE,.03,.75,.6,-.44,.375,-.55,[-.9,.4,-.4]);
+P(4,WOOD,.92,.03,.6,0,.76,-.55,[0,1.0,-.8]);
+// pared + soportes (paso 5)
+const wall=new THREE.Mesh(new THREE.BoxGeometry(.06,2.4,3.2),new THREE.MeshStandardMaterial({color:0xcfd3d6,roughness:.95}));wall.position.set(-.58,1.2,0);wall.receiveShadow=true;sc.add(wall);
+const brk=[];for(const z of[-.5,.5]){const b=new THREE.Mesh(new RoundedBoxGeometry(.05,.16,.1,2,.01),STEEL);b.position.set(-.53,1.52,z);b.castShadow=true;sc.add(b);brk.push(b)}
+// tornillos
+const screws=[];
+function screwAt(step,tOff,x,y,z,axis='x'){const g=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.05,10),STEEL);const h=new THREE.Mesh(new THREE.CylinderGeometry(.022,.022,.012,10),STEEL);h.position.y=.03;g.add(h);if(axis==='x')g.rotation.z=Math.PI/2;else if(axis==='z')g.rotation.x=Math.PI/2;g.position.set(x,y,z);g.castShadow=true;sc.add(g);screws.push({g,step,tOff,ax:axis,fin:new THREE.Vector3(x,y,z)})}
+for(const sx of[-1,1])for(const sz of[-1,1]){screwAt(1,2.2+(sx>0?.15:0)+(sz>0?.3:0),sx*.5+sx*.045,1.24,sz*.9,'x')}
+for(const sx of[-1,1]){screwAt(3,2.2,sx*.18+sx*.025,.35,1.08,'x');screwAt(3,2.5,sx*.18+sx*.025,.97,1.08,'x')}
+screwAt(4,2.3,.44,.72,-.38,'x');screwAt(4,2.5,-.44,.72,-.38,'x');
+// llave allen
+const allen=new THREE.Group();{const a=new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,.16,8),STEEL);a.position.y=.08;const b=new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,.06,8),STEEL);b.rotation.z=Math.PI/2;b.position.set(.03,.16,0);allen.add(a,b)}allen.scale.setScalar(2.2);sc.add(allen);
+// taladro (módulo reutilizable)
+const D=buildDrill();const drill=new THREE.Group();D.group.scale.setScalar(.012);D.group.position.set(0,.2,0);drill.add(D.group);sc.add(drill);
+// anillos de resalte
+const ring=new THREE.Mesh(new THREE.TorusGeometry(.07,.006,8,32),new THREE.MeshBasicMaterial({color:0x0f9d8a}));sc.add(ring);
+const STEPS=[
+ {t0:9,k:'PASSO 1 DI 5',h:'Struttura laterale',p:'Unisci i montanti alle traverse e fissa con le viti.',tools:['allen']},
+ {t0:15,k:'PASSO 2 DI 5',h:'Doghe del letto',p:'Appoggia le doghe sui supporti, ben allineate.',tools:[]},
+ {t0:21,k:'PASSO 3 DI 5',h:'Scala e protezione',p:'Fissa la scala sul lato corto e la protezione sul lato lungo.',tools:['allen']},
+ {t0:27,k:'PASSO 4 DI 5',h:'Scrivania',p:'Monta i pannelli laterali e poi il piano.',tools:['cac']},
+ {t0:33,k:'PASSO 5 DI 5',h:'Fissaggio al muro',p:'Fissa il letto al muro con le staffe. Controlla cavi e tubi prima di forare.',tools:['tra'],warn:'SICUREZZA: il letto va sempre fissato al muro'}];
+const ICON={allen:['Chiave a brugola','<svg viewBox="0 0 48 40"><path d="M10 30V8h8M10 30h28" stroke="#1f2933" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
+ cac:['Cacciavite','<svg viewBox="0 0 48 40"><rect x="4" y="15" width="18" height="10" rx="4" fill="#0f9d8a"/><path d="M22 20h22" stroke="#1f2933" stroke-width="4" stroke-linecap="round"/></svg>'],
+ tra:['Trapano','<svg viewBox="0 0 48 40"><rect x="6" y="8" width="26" height="12" rx="5" fill="#f2b705"/><rect x="12" y="18" width="9" height="16" rx="3" fill="#1f2933"/><path d="M32 14h12" stroke="#1f2933" stroke-width="3" stroke-linecap="round"/></svg>']};
+const ease=x=>{x=Math.min(1,Math.max(0,x));return 1-Math.pow(1-x,3)};
+const $=id=>document.getElementById(id);
+let lastUI='';
+function setUI(t){
+ let ui='';const bar=$('bar');
+ $('title').style.display=t<4?'flex':'none';$('title').style.opacity=t>3.4?Math.max(0,(4-t)/.6):1;
+ $('tag').style.display=(t>=4&&t<44)?'block':'none';
+ $('list').style.display=(t>=4&&t<9)?'block':'none';
+ if(t>=4&&t<9&&lastUI!=='L'){$('list').innerHTML='<h3>COSA TI SERVE</h3><b>4</b>Montanti<br><b>4</b>Traverse<br><b>12</b>Doghe<br><b>1</b>Scala + protezione<br><b>3</b>Pannelli scrivania<br><b>+</b>Viti e 2 staffe a muro<br><br><h3>STRUMENTI</h3>Chiave a brugola · Cacciavite · Trapano';lastUI='L'}
+ const si=STEPS.findIndex((s,i)=>t>=s.t0&&t<(STEPS[i+1]?STEPS[i+1].t0:39));
+ bar.style.display=(si>=0)?'flex':'none';
+ if(si>=0){const s=STEPS[si];const key='S'+si;if(lastUI!==key){lastUI=key;$('num').textContent=si+1;$('k').textContent=s.k;$('h').textContent=s.h;$('p').textContent=s.p;
+  $('tools').innerHTML=s.tools.map(k=>`<div class="tool">${ICON[k][1]}${ICON[k][0]}</div>`).join('')||'<div class="tool">✋<br>A mano</div>';}
+  $('warn').style.display=(s.warn&&t>=s.t0+1.2)?'block':'none';$('warn').textContent=s.warn||''}
+ else $('warn').style.display='none';
+ $('qrc').style.display=(t>=39&&t<44)?'block':'none';$('qrc').style.opacity=ease((t-39)/.6);
+ $('end').style.display=t>=44?'flex':'none';$('end').style.opacity=ease((t-44)/.6);
+}
+window.setTime=function(t){
+ setUI(t);
+ const az=(36+14*Math.sin(t*.22))*Math.PI/180,el=20*Math.PI/180,dist=t<9?7.4:(t>=33&&t<39?5.4:5.8);
+ const ty=.85;cam.position.set(Math.sin(az)*Math.cos(el)*dist,ty+Math.sin(el)*dist,Math.cos(az)*Math.cos(el)*dist);cam.lookAt(0,ty,0);
+ const show=t>=4;bed.visible=show;
+ for(const p of parts){const st=STEPS[p.step-1].t0;const k=ease((t-(st+.15*(p.i%6)))/1.0);
+  const fl=Math.sin(t*1.2+p.i)*.02*(1-k);
+  p.m.position.copy(p.fin).addScaledVector(p.from,1-k).y+=fl;
+  p.m.scale.setScalar(show?Math.min(1,ease((t-4)/.8)):0.001)}
+ // tornillos
+ for(const s of screws){const t1=STEPS[s.step-1].t0+s.tOff;const k=ease((t-t1)/.5);s.g.visible=t>=t1-.01;const off=(1-k)*.08;const dir=s.fin.x>=0?1:-1;
+  s.g.position.copy(s.fin);if(s.ax==='x')s.g.position.x+=dir*off;else s.g.position.y+=off;}
+ // wall + brackets
+ const wk=ease((t-33)/.8);wall.visible=t>=33;wall.scale.set(1,Math.max(.001,wk),1);for(const b of brk){b.visible=t>=35;b.position.x=-.53+(1-ease((t-35)/.6))*.2}
+ // allen key
+ const si=STEPS.findIndex((s,i)=>t>=s.t0&&t<(STEPS[i+1]?STEPS[i+1].t0:39));
+ allen.visible=false;drill.visible=false;ring.visible=false;
+ if(si>=0){const s=STEPS[si],u=t-s.t0;
+  if(s.tools.includes('allen')&&u>2.2&&u<5.6){const sc0=screws.filter(x=>x.step===si+1);const tgt=sc0[Math.min(sc0.length-1,Math.floor((u-2.2)/.5))];
+   if(tgt){allen.visible=true;allen.position.copy(tgt.fin).add(new THREE.Vector3(tgt.fin.x>=0?.08:-.08,0,0));allen.rotation.set(0,0,tgt.fin.x>=0?Math.PI/2:-Math.PI/2);allen.rotateY(u*8);ring.visible=true;ring.position.copy(tgt.fin);ring.lookAt(cam.position);ring.scale.setScalar(1+.25*Math.sin(u*10))}}
+  if(s.tools.includes('tra')&&u>2.0){drill.visible=true;drill.position.set(-.1,1.55,.5);drill.rotation.set(0,-Math.PI/2,0);drill.rotateZ(0);D.spin.rotation.x=u*18;
+   ring.visible=true;ring.position.set(-.53,1.52,.5);ring.lookAt(cam.position);ring.scale.setScalar(1+.25*Math.sin(u*10))}
+  if(s.tools.includes('cac')&&u>2.2&&u<5.6){ring.visible=true;const q=screws.filter(x=>x.step===4)[Math.floor((u-2.2)/.5)%2]||screws.find(x=>x.step===4);ring.position.copy(q.fin);ring.lookAt(cam.position);ring.scale.setScalar(1+.25*Math.sin(u*10))}}
+ R.render(sc,cam);
+ document.body.style.opacity=t>END-.4?Math.max(0,(END-t)/.4):1;
+};
+window.READY=true;window.setTime(0);
+</script></body></html>
