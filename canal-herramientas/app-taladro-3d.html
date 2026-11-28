@@ -28,6 +28,13 @@ html,body{width:720px;height:1280px;background:#000;overflow:hidden;font-family:
 .chips{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0}.chips div{padding:4px 7px;border-radius:5px;background:#1a1a15;color:var(--m);font-size:9px}.chips div.on{background:#e8e4d6;color:#111;font-weight:800}
 .row{display:flex;gap:10px;font-size:10px;margin:3px 0}.row s{text-decoration:none;color:var(--m);width:62px;font-size:8px;letter-spacing:1px}
 #cur{position:absolute;width:22px;height:22px;z-index:9}
+#chat{position:absolute;left:0;top:0;width:720px;height:640px;background:#1b1b19;z-index:8;display:none;overflow:hidden;font-size:13px;line-height:1.45;color:#d8d5c8}
+#ci{padding:26px 34px;position:absolute;left:0;top:0;width:720px}
+#ci [data-t]{opacity:0;margin-bottom:12px}
+.dim{color:#8d897b}.ubub{margin-left:auto;width:max-content;max-width:300px;background:#2a2a27;border-radius:12px;padding:9px 14px;font-size:13px}
+.sub2{border:1px solid #33332e;border-radius:10px;padding:9px 12px;display:flex;justify-content:space-between;color:#cfcbbc}
+.ag{display:flex;gap:10px;align-items:center}.ag span{flex:none;width:7px;height:7px;border-radius:50%;background:#7bd88f}
+#ci ul{margin:6px 0 0 18px}#ci li{margin-bottom:5px}
 #cam{position:absolute;left:0;top:640px;width:720px;height:640px;background:linear-gradient(160deg,#2a3340,#12161c);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:#8fa0b5}
 #cam .c{width:190px;height:190px;border-radius:50%;border:4px dashed #5d6f86;display:flex;align-items:center;justify-content:center;font-size:80px}
 #cam p{font-size:28px;font-weight:800;letter-spacing:2px}#cam small{font-size:18px;color:#6f8096}
@@ -38,7 +45,18 @@ html,body{width:720px;height:1280px;background:#000;overflow:hidden;font-family:
  <div id="hd"><b>MI TALADRO</b><span class="pill">EJEMPLO · 20 V</span><span class="tab on" id="t0">El taladro</span><span class="tab" id="t1">Hacer un hueco</span><span class="tab" id="t2">Según la pared</span><span class="tab">La estantería</span></div>
  <div id="view"></div><div id="hot"></div>
  <div id="panel"></div>
- <svg id="cur" viewBox="0 0 24 24"><path d="M3 2l16 9-7 2-3 7z" fill="#fff" stroke="#000" stroke-width="1.5"/></svg>
+ <div id="chat"><div id="ci">
+ <div data-t="3.4">Tres de los cuatro agentes ya terminaron y su trabajo está unido en la guía:
+  <ul><li><b>El taladro:</b> modelo 3D a escala, con el selector de velocidad como dice el manual.</li><li><b>Hacer un hueco:</b> paso a paso, con medidas desde el enchufe.</li><li><b>Según la pared:</b> ladrillo, concreto, madera y drywall.</li></ul></div>
+ <div data-t="3.4" class="dim">Falta el agente de la pared. Cuando termine, la revisión de ojos frescos y la publicación.</div>
+ <div data-t="4.6" class="ubub">Crea un equipo de gente para eso.</div>
+ <div data-t="5.8">Listo. Cada agente trabaja en su parte y un revisor con ojos frescos lo mira todo, para que nadie pise la zona de otro.</div>
+ <div data-t="6.8" class="dim ag"><span></span>Agente completado · Pared: hueco y materiales realistas</div>
+ <div data-t="7.4" class="dim ag"><span></span>Agente completado · Taladro: modelo 3D a escala</div>
+ <div data-t="8.0" class="dim ag"><span></span>Subagente · Crítico: revisión de principiante</div>
+ <div data-t="8.6" class="sub2"><span>Mi taladro</span><span class="dim">Publicado ›</span></div>
+</div></div>
+<svg id="cur" viewBox="0 0 24 24"><path d="M3 2l16 9-7 2-3 7z" fill="#fff" stroke="#000" stroke-width="1.5"/></svg>
 </div>
 <div id="cam"><div class="c">&#128100;</div><p>TU CÁMARA AQUÍ</p><small>Pega tu vídeo en esta mitad (720×640)</small></div>
 <div id="tag"></div><div id="cap"></div>
@@ -98,12 +116,11 @@ const panel=document.getElementById('panel');
 const glowMap={1:'chuck',2:'ring',3:'speed',4:'fwd',5:'trigger',6:'battery'};
 const ease=x=>x<0?0:x>1?1:x*x*(3-2*x);
 // timeline
-const T0=[0,14.4],T1=[14.4,26],T2=[26,38.0];
+const T1=[19,28.5],T2=[28.5,38.0];
 const END=38;
-const CUR=[[0,300,420],[2.2,330,300],[3.6,372,300],[5.4,160,140],[7.8,200,150],[9.6,330,260],[11.6,330,410],[14,300,70],[14.8,300,20],[17,150,330],[21,330,200],[25,330,300],[25.9,278,20],[27.5,330,160],[29,350,150],[30,330,125],[31.5,350,135],[34,330,200],[38,330,300]];
-const WORDS="mira esta app. una IA la construyó para enseñarme a usar el taladro. primero, el mandril, aquí entra la broca. luego, el anillo de modo, y la velocidad uno o dos. el botón de giro, y el gatillo: empieza despacio. y la batería de veinte voltios. después, antes de hacer un hueco, mide, marca y revisa qué hay detrás de la pared. cables, tuberías, nada de eso. y según la pared, ladrillo, concreto o madera, cambia la broca y el modo. sígueme y aprende una herramienta nueva cada semana.".split(' ');
-const ANCH=[[0,3.6,0,9],[3.6,14.4,9,32],[14.4,26,32,52],[26,34,52,74],[34,37.6,74,WORDS.length]];
-const WT=[];for(const [a,b,i0,i1] of ANCH){const n=i1-i0;for(let i=0;i<n;i++)WT.push([a+(b-a)*i/n,a+(b-a)*(i+1)/n,WORDS[i0+i]])}
+const CUR=[[0,300,420],[2,330,300],[3.2,400,200],[4.4,600,520],[8,560,560],[9.4,330,150],[11,170,140],[13,200,150],[15,330,260],[17,330,410],[18.8,300,70],[19.6,300,20],[21,150,330],[25,330,200],[28,330,300],[28.9,278,20],[30,330,160],[31.5,350,150],[33,330,125],[34.5,350,135],[37,330,200],[38,330,300]];
+const SEG=[[0,3.4,"mira esta app. una IA la construyó para enseñarme a usar el taladro."],[3.4,9.4,"le pedí: crea un equipo de gente para eso. y varios agentes trabajaron a la vez: uno el taladro, otro la pared, y un crítico que lo revisa."],[9.4,19,"primero, el mandril, aquí entra la broca. luego, el anillo de modo, la velocidad uno o dos. el botón de giro, y el gatillo: empieza despacio. y la batería de veinte voltios."],[19,28.5,"antes de hacer un hueco, mide, marca y revisa qué hay detrás de la pared. cables, tuberías, nada de eso."],[28.5,37.6,"y según la pared, ladrillo, concreto o madera, cambia la broca y el modo. sígueme y aprende una herramienta nueva cada semana."]];
+const WT=[];for(const [a,b,tx] of SEG){const ws=tx.split(' ');const n=ws.length;for(let i=0;i<n;i++)WT.push([a+(b-a)*i/n,a+(b-a)*(i+1)/n,ws[i]])}
 function tab(t){return t<T1[0]?0:t<T2[0]?1:2}
 function html0(act){return `<div class="k">FASE 0 · CONSEJO</div><h2>TU TALADRO,<br>PARTE POR PARTE</h2><div class="sub">Gira con el dedo. Toca un número para ver qué hace cada parte.</div>
 <div class="box">Lo más importante: el anillo de adelante. Ahí eliges qué vas a hacer. Pruébalo:</div>
@@ -121,10 +138,14 @@ return `<div class="k">QUÉ HACER SEGÚN LA PARED</div><h2>SEGÚN LA PARED</h2><
 ${inf.map(r=>`<div class="row"><s>${r[0].toUpperCase()}</s><b>${r[1]}</b></div>`).join('')}
 <div class="box red"><b>Nunca taladres</b><br>cerca de cables, duchas y tubos de agua. Usa un detector antes.</div>`}
 let lastKey='';
+function chatShow(t){const ch=document.getElementById('chat');const on=t>=3.4&&t<9.4;ch.style.display=on?'block':'none';if(!on)return;
+ for(const e of ch.querySelectorAll('[data-t]'))e.style.opacity=t>=+e.dataset.t?1:0;
+ document.getElementById('ci').style.top=(-Math.max(0,t-5.2)*18)+'px'}
 window.setTime=function(t){
+ chatShow(t);
  const tb=tab(t);for(let i=0;i<3;i++)document.getElementById('t'+i).className='tab'+(i===tb?' on':'');
  // active item in tab0
- let act=0;if(tb===0&&t>=3.6)act=Math.min(6,1+Math.floor((t-3.6)/1.65));
+ let act=0;if(tb===0&&t>=9.4)act=Math.min(6,1+Math.floor((t-9.4)/1.6));
  const key=tb+'|'+act+'|'+(tb===1?Math.floor((t-T1[0])/1):'')+(tb===2?Math.floor((t-T2[0])/1):'');
  if(key!==lastKey){lastKey=key;panel.innerHTML=tb===0?html0(act):tb===1?html1(t):html2(t)}
  // visibility
@@ -139,7 +160,7 @@ window.setTime=function(t){
  if(tb===1){drill.scale.setScalar(.55);drill.position.set(-1.7,-1.1,1.2);drill.rotation.set(0,.5,0);cam.position.set(1.2,1.2,12.5);cam.lookAt(.6,.2,0)}
  if(tb===2){drill.scale.setScalar(.6);drill.position.set(-1.9,-.6,1);drill.rotation.set(0,.6,0);cam.position.set(1.4,.9,12.5+Math.sin(t*.4)*.3);cam.lookAt(.4,.1,0);pil.rotation.y=-.35+Math.sin(t*.6)*.12}
  // spin
- let spin=0;if(tb===0&&act>=5)spin=(t-3.6-4*1.65)*3;sp.rotation.x=spin;chuck.rotation.x=spin;
+ let spin=0;if(tb===0&&act>=5)spin=(t-9.4-4*1.6)*3;sp.rotation.x=spin;chuck.rotation.x=spin;
  R.render(sc,cam);
  // hotspots
  for(const i of [1,2,3,4,5,6]){const e=hs[i];if(tb!==0){e.style.display='none';continue}e.style.display='flex';
@@ -149,7 +170,7 @@ window.setTime=function(t){
  let a=CUR[0],b=CUR[CUR.length-1];for(let j=0;j<CUR.length-1;j++)if(t>=CUR[j][0]&&t<CUR[j+1][0]){a=CUR[j];b=CUR[j+1];break}
  const u=ease((t-a[0])/Math.max(.01,b[0]-a[0]));const cu=document.getElementById('cur');cu.style.left=(a[1]+(b[1]-a[1])*u)+'px';cu.style.top=(a[2]+(b[2]-a[2])*u)+'px';
  // tag + captions
- const tg=document.getElementById('tag');tg.style.display=t<3.6?'block':'none';tg.innerHTML='Una IA me está enseñando<br>a usar el taladro';
+ const tg=document.getElementById('tag');tg.style.display=t<3.4?'block':'none';tg.innerHTML='Una IA me está enseñando<br>a usar el taladro';
  let w='';for(const [x,y,z] of WT){if(t>=x&&t<y){w=z.replace(/[¿?,.:]/g,'');break}}
  document.getElementById('cap').textContent=w;
  document.body.style.opacity=t>END-.4?Math.max(0,(END-t)/.4):1;
