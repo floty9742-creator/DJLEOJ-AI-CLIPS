@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="it"><head><meta charset="utf-8"><title>Demo montaggio</title>
+<style>
+:root{--ink:#1f2933;--acc:#0f9d8a;--warn:#d64545}
+*{box-sizing:border-box;margin:0}
+html,body{width:1280px;height:720px;overflow:hidden;background:#d9d6cf;font-family:"DejaVu Sans","Liberation Sans",Arial,sans-serif;color:var(--ink)}
+#view{position:absolute;inset:0}
+#tag{position:absolute;left:28px;top:22px;font-size:15px;letter-spacing:1px;color:#4b5560;background:rgba(255,255,255,.75);padding:8px 14px;border-radius:8px}
+#bar{position:absolute;left:28px;right:28px;bottom:26px;height:132px;background:rgba(255,255,255,.95);border-radius:18px;display:flex;align-items:center;gap:22px;padding:0 28px;box-shadow:0 8px 30px rgba(0,0,0,.18)}
+#num{flex:none;width:76px;height:76px;border-radius:50%;background:var(--ink);color:#fff;font-size:38px;font-weight:800;display:flex;align-items:center;justify-content:center}
+#txt{flex:1}#txt small{font-size:15px;color:var(--acc);font-weight:800;letter-spacing:2px}
+#txt h2{font-size:32px;margin:3px 0 4px}#txt p{font-size:19px;color:#4b5560;line-height:1.3}
+#tools{display:flex;gap:12px}
+.tool{width:104px;height:92px;border-radius:12px;background:#f2f1ed;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700;text-align:center}
+.tool svg{width:48px;height:40px}
+#warn{position:absolute;left:28px;right:28px;bottom:170px;background:var(--warn);color:#fff;font-size:22px;font-weight:800;padding:13px 22px;border-radius:12px;display:none}
+#title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:linear-gradient(160deg,#1f2933,#2f3d4a);color:#fff;gap:18px}
+#title h1{font-size:68px;line-height:1.1}#title h1 em{font-style:normal;color:#5fe0c8}#title p{font-size:26px;color:#c4ccd4}
+#list{position:absolute;left:28px;top:80px;width:360px;background:rgba(255,255,255,.95);border-radius:16px;padding:22px 24px;font-size:19px;line-height:1.7;display:none}
+#list h3{font-size:16px;color:var(--acc);letter-spacing:2px;margin-bottom:6px}
+#list b{display:inline-block;width:30px;color:#6b7782}
+#qrc{position:absolute;right:40px;top:90px;width:360px;background:#fff;border-radius:18px;padding:24px;text-align:center;box-shadow:0 10px 36px rgba(0,0,0,.2);display:none}
+#qrc img{width:250px;height:250px}#qrc h3{font-size:24px;margin:12px 0 6px}#qrc p{font-size:16px;color:#4b5560;line-height:1.35}
+#end{position:absolute;inset:0;background:linear-gradient(160deg,#1f2933,#2f3d4a);color:#fff;display:none;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center}
+#end h1{font-size:60px}#end .row{display:flex;gap:26px}#end .k{background:rgba(255,255,255,.1);border-radius:16px;padding:22px 26px;width:300px;font-size:24px;line-height:1.3}
+#end .k b{display:block;font-size:44px;color:#5fe0c8}
+#end small{font-size:15px;color:#9aa6b2;max-width:900px}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/examples/jsm/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script></head><body>
+<div id="view"></div>
+<div id="tag">DEMO CONCETTO · prodotto generico · non è materiale ufficiale</div>
+<div id="list"></div><div id="qrc"><img src="qr-demo.png"><h3>Scansiona il QR</h3><p>sul manuale: il video di montaggio di questo prodotto, passo dopo passo.</p></div>
+<div id="warn"></div>
+<div id="bar"><div id="num">1</div><div id="txt"><small id="k"></small><h2 id="h"></h2><p id="p"></p></div><div id="tools"></div></div>
+<div id="title"><h1>Ogni prodotto,<br><em>il suo video di montaggio</em></h1><p>Un codice QR sul manuale. Montaggio chiaro, passo dopo passo.</p></div>
+<div id="end"><h1>Montare bene, al primo tentativo</h1><div class="row"><div class="k"><b>−</b>errori di montaggio</div><div class="k"><b>−</b>chiamate al servizio clienti</div><div class="k"><b>−</b>resi e riparazioni</div></div><small>Idea di concetto. Dati di impatto da misurare in un progetto pilota. Prodotto generico, senza materiali di terzi.</small></div>
+<script type="module">
+import * as THREE from 'three';
+import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
+import {RoundedBoxGeometry} from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass.js';
+import {SSAOPass} from 'three/examples/jsm/postprocessing/SSAOPass.js';
+import {OutputPass} from 'three/examples/jsm/postprocessing/OutputPass.js';
+import {buildDrill} from './modelo-taladro.js';
+const W=1280,H=720,END=48;
+const DPR=window.devicePixelRatio||1;
+const R=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});R.setPixelRatio(DPR);R.setSize(W,H);
+R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.05;R.outputColorSpace=THREE.SRGBColorSpace;R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
+document.getElementById('view').appendChild(R.domElement);
+const sc=new THREE.Scene();sc.background=new THREE.Color(0xd9d6cf);
+const cam=new THREE.PerspectiveCamera(30,W/H,.1,60);
+const pm=new THREE.PMREMGenerator(R);sc.environment=pm.fromScene(new RoomEnvironment(),.04).texture;sc.environmentIntensity=.7;
+const key=new THREE.DirectionalLight(0xfff1dc,2.6);key.position.set(3.5,5,4);key.castShadow=true;key.shadow.mapSize.set(4096,4096);
+Object.assign(key.shadow.camera,{left:-4.5,right:4.5,top:4.5,bottom:-4.5,near:1,far:22});key.shadow.radius=4;key.shadow.bias=-.0003;key.shadow.normalBias=.01;sc.add(key);
+const win=new THREE.DirectionalLight(0xdfeaff,.9);win.position.set(2,3,-3);sc.add(win);
+const fillL=new THREE.HemisphereLight(0xffffff,0xb59a7a,.55);sc.add(fillL);
+// ---------- texturas procedurales
+function tex(w,h,draw,srgb,rep){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=srgb?THREE.SRGBColorSpace:THREE.NoColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=8;if(rep)t.repeat.set(...rep);return t}
+const rnd=(()=>{let s=7;return()=>{s=(s*16807)%2147483647;return s/2147483647}})();
+function woodMaps(base,dark){
+ const draw=(c,w,h,bump)=>{c.fillStyle=bump?'#808080':base;c.fillRect(0,0,w,h);
+  for(let i=0;i<260;i++){const y=rnd()*h,a=.05+rnd()*.2,th=.6+rnd()*2.2;c.strokeStyle=bump?`rgba(${rnd()>.5?255:0},${rnd()>.5?255:0},0,${a*1.3})`:`rgba(${dark},${a})`;c.lineWidth=th;c.beginPath();c.moveTo(0,y);const wav=rnd()*6+1,ph=rnd()*6;for(let x=0;x<=w;x+=16)c.lineTo(x,y+Math.sin(x/90+ph)*wav);c.stroke()}
+  for(let k=0;k<3;k++){const cx=rnd()*w,cy=rnd()*h;for(let r=2;r<34;r+=3){c.strokeStyle=bump?'rgba(255,255,255,.12)':`rgba(${dark},${.16-r/320})`;c.lineWidth=1.3;c.beginPath();c.ellipse(cx,cy,r*2.6,r,0,0,7);c.stroke()}}};
+ return {map:tex(512,512,(c,w,h)=>draw(c,w,h,false),true,[1,1]),bump:tex(512,512,(c,w,h)=>draw(c,w,h,true),false,[1,1])}}
+const pine=woodMaps('#d8b680','95,62,28'),oak=woodMaps('#b98a58','70,42,18');
+const noiseBump=tex(256,256,(c,w,h)=>{c.fillStyle='#808080';c.fillRect(0,0,w,h);for(let i=0;i<9000;i++){const v=90+rnd()*90|0;c.fillStyle=`rgb(${v},${v},${v})`;c.fillRect(rnd()*w,rnd()*h,1,1)}},false,[3,3]);
+const parquet=tex(1024,1024,(c,w,h)=>{c.fillStyle='#7a5430';c.fillRect(0,0,w,h);const pw=64,ph=512;for(let col=0;col<w/pw;col++){const off=(col%2)*128+((col*7)%3)*64;for(let r=-1;r<3;r++){const y=r*ph/2+off-(col%3)*40;const t=.88+rnd()*.24;c.fillStyle=`rgb(${190*t|0},${145*t|0},${95*t|0})`;c.fillRect(col*pw,y,pw,ph/2);for(let k=0;k<26;k++){c.strokeStyle=`rgba(90,55,20,${.05+rnd()*.12})`;c.lineWidth=.7+rnd();const xx=col*pw+rnd()*pw;c.beginPath();c.moveTo(xx,y);c.lineTo(xx+(rnd()-.5)*5,y+ph/2);c.stroke()}c.strokeStyle='rgba(40,25,10,.55)';c.lineWidth=1.5;c.strokeRect(col*pw,y,pw,ph/2)}}},true,[3,3]);
+const quilt=tex(256,256,(c,w,h)=>{c.fillStyle='#808080';c.fillRect(0,0,w,h);for(let i=0;i<8;i++)for(let j=0;j<8;j++){const g=c.createRadialGradient(i*32+16,j*32+16,2,i*32+16,j*32+16,22);g.addColorStop(0,'#fff');g.addColorStop(1,'#505050');c.fillStyle=g;c.fillRect(i*32,j*32,32,32)}},false,[2,3]);
+// ---------- materiales
+const LAM=new THREE.MeshPhysicalMaterial({color:0xf2f1ec,roughness:.42,clearcoat:.15,clearcoatRoughness:.5,bumpMap:noiseBump,bumpScale:.15});
+const PINE=new THREE.MeshStandardMaterial({map:pine.map,bumpMap:pine.bump,bumpScale:.7,roughness:.62});
+const OAK=new THREE.MeshStandardMaterial({map:oak.map,bumpMap:oak.bump,bumpScale:.7,roughness:.55});
+const STEEL=new THREE.MeshStandardMaterial({color:0xaeb4bb,roughness:.28,metalness:1});
+const BLACK=new THREE.MeshStandardMaterial({color:0x151515,roughness:.5});
+// ---------- habitación
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(10,10),new THREE.MeshStandardMaterial({map:parquet,roughness:.38,metalness:0,bumpMap:noiseBump,bumpScale:.1}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;sc.add(floor);
+const paint=new THREE.MeshStandardMaterial({color:0xe9e6df,roughness:.95,bumpMap:noiseBump,bumpScale:.05});
+const wallL=new THREE.Mesh(new THREE.BoxGeometry(.06,2.7,5),paint);wallL.position.set(-.58,1.35,.6);wallL.receiveShadow=true;sc.add(wallL);
+const wallB=new THREE.Mesh(new THREE.BoxGeometry(6,2.7,.06),paint);wallB.position.set(2.3,1.35,-1.9);wallB.receiveShadow=true;sc.add(wallB);
+for(const [w,pos,rotY] of [[5,[-.55,.07,.6],Math.PI/2],[6,[2.3,.07,-1.87],0]]){const b=new THREE.Mesh(new THREE.BoxGeometry(w,.14,.025),new THREE.MeshStandardMaterial({color:0xf5f4f0,roughness:.5}));b.position.set(...pos);b.rotation.y=rotY;b.castShadow=b.receiveShadow=true;sc.add(b)}
+// ventana en pared trasera
+const wg=new THREE.Group();wg.position.set(1.6,1.45,-1.86);sc.add(wg);
+const glass=new THREE.Mesh(new THREE.PlaneGeometry(1.3,1.15),new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false}));glass.position.z=.01;wg.add(glass);
+for(const [w,h,x,y] of [[1.42,.07,0,.6],[1.42,.07,0,-.6],[.07,1.27,-.68,0],[.07,1.27,.68,0],[.04,1.15,0,0],[1.3,.04,0,0]]){const f=new THREE.Mesh(new THREE.BoxGeometry(w,h,.09),new THREE.MeshStandardMaterial({color:0xf3f2ee,roughness:.5}));f.position.set(x,y,.03);f.castShadow=true;wg.add(f)}
+// ---------- cama
+const bed=new THREE.Group();sc.add(bed);
+const parts=[];let idx=0;
+function P(step,mat,w,h,d,x,y,z,from){const m=new THREE.Mesh(new RoundedBoxGeometry(w,h,d,4,Math.min(w,h,d)*.22),mat);m.castShadow=m.receiveShadow=true;bed.add(m);
+ const o={m,step,fin:new THREE.Vector3(x,y,z),from:new THREE.Vector3(...(from||[Math.sign(x||.3)*.9,.9+(idx%4)*.15,(z||.01)*.45+(idx%2?.25:-.25)])),i:idx++};parts.push(o);return o}
+for(const sx of[-1,1])for(const sz of[-1,1])P(1,LAM,.09,1.7,.09,sx*.5,.85,sz*1.0);
+for(const sx of[-1,1])P(1,LAM,.04,.2,2.0,sx*.5,1.2,0);
+for(const sz of[-1,1])P(1,LAM,1.0,.2,.04,0,1.2,sz*1.0);
+for(let i=0;i<12;i++)P(2,PINE,.86,.02,.07,0,1.13,-.9+i*.164,[0,1.0+(i%3)*.15,(i-5.5)*.12]);
+P(2,PINE,.03,.05,1.9,-.455,1.1,0,[-.6,1.2,0]);P(2,PINE,.03,.05,1.9,.455,1.1,0,[.6,1.2,0]);
+for(const sx of[-1,1])P(3,LAM,.04,1.3,.04,sx*.18,.65,1.08,[sx*.8,.8,.6]);
+for(let i=0;i<4;i++)P(3,OAK,.36,.035,.05,0,.28+i*.26,1.08,[0,.7+i*.1,.9+i*.1]);
+P(3,LAM,.03,.12,1.4,.5,1.5,-.15,[.9,.9,0]);
+P(4,LAM,.03,.75,.6,.44,.375,-.55,[.9,.4,-.4]);P(4,LAM,.03,.75,.6,-.44,.375,-.55,[-.9,.4,-.4]);
+P(4,PINE,.92,.03,.6,0,.76,-.55,[0,1.0,-.8]);
+// tornillería
+const screws=[];
+function screwAt(step,tOff,x,y,z,axis='x'){const g=new THREE.Group();const sh=new THREE.Mesh(new THREE.CylinderGeometry(.011,.011,.055,12),STEEL);const hd=new THREE.Mesh(new THREE.CylinderGeometry(.024,.022,.012,6),STEEL);hd.position.y=.032;const hole=new THREE.Mesh(new THREE.CylinderGeometry(.01,.01,.004,6),BLACK);hole.position.y=.039;g.add(sh,hd,hole);
+ const cap=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.016,20),LAM);cap.position.y=.035;g.add(cap);cap.visible=false;
+ if(axis==='x')g.rotation.z=-Math.PI/2*Math.sign(x);else g.rotation.x=Math.PI/2;g.position.set(x,y,z);g.traverse(o=>{o.castShadow=true});sc.add(g);screws.push({g,cap,hd,hole,step,tOff,ax:axis,fin:new THREE.Vector3(x,y,z)})}
+for(const sx of[-1,1])for(const sz of[-1,1])screwAt(1,2.2+(sx>0?.15:0)+(sz>0?.3:0),sx*.5+sx*.02,1.24,sz*.9,'x');
+for(const sx of[-1,1]){screwAt(3,2.2,sx*.18+sx*.02,.35,1.08,'x');screwAt(3,2.5,sx*.18+sx*.02,.97,1.08,'x')}
+screwAt(4,2.3,.44+.015,.72,-.38,'x');screwAt(4,2.5,-.44-.015,.72,-.38,'x');
+// llave allen y taladro
+const allen=new THREE.Group();{const a=new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,.16,8),STEEL);a.position.y=.08;const b=new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,.06,8),STEEL);b.rotation.z=Math.PI/2;b.position.set(.03,.16,0);allen.add(a,b)}allen.scale.setScalar(2.2);sc.add(allen);
+const D=buildDrill();const drill=new THREE.Group();D.group.scale.setScalar(.012);D.group.position.set(0,.2,0);drill.add(D.group);sc.add(drill);
+D.group.traverse(o=>{if(o.isMesh)o.castShadow=true});
+const ring=new THREE.Mesh(new THREE.TorusGeometry(.07,.006,8,32),new THREE.MeshBasicMaterial({color:0x0f9d8a}));sc.add(ring);
+// soportes de pared
+const brk=[];for(const z of[-.5,.5]){const b=new THREE.Mesh(new RoundedBoxGeometry(.05,.16,.1,3,.012),STEEL);b.position.set(-.53,1.52,z);b.castShadow=true;sc.add(b);brk.push(b)}
+// ---------- puesta en escena final (colchón y objetos)
+const dressed=new THREE.Group();sc.add(dressed);
+{const mat=new THREE.Mesh(new RoundedBoxGeometry(.88,.16,1.95,6,.06),new THREE.MeshStandardMaterial({color:0xf6f5f1,roughness:.9,bumpMap:quilt,bumpScale:.8}));mat.position.set(0,1.22,0);mat.castShadow=mat.receiveShadow=true;dressed.add(mat);
+ const duv=new THREE.Mesh(new RoundedBoxGeometry(.9,.07,1.2,6,.03),new THREE.MeshStandardMaterial({color:0x3f8f8a,roughness:.95,bumpMap:quilt,bumpScale:1.2}));duv.position.set(0,1.33,-.35);duv.castShadow=true;dressed.add(duv);
+ const pil=new THREE.Mesh(new RoundedBoxGeometry(.5,.1,.32,6,.045),new THREE.MeshStandardMaterial({color:0xfaf9f6,roughness:.95,bumpMap:quilt,bumpScale:.6}));pil.position.set(0,1.36,.72);pil.rotation.x=-.05;pil.castShadow=true;dressed.add(pil);
+ const lamp=new THREE.Group();const lb=new THREE.Mesh(new THREE.CylinderGeometry(.07,.08,.02,24),BLACK);const la=new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,.32,10),BLACK);la.position.y=.16;const lh=new THREE.Mesh(new THREE.ConeGeometry(.08,.12,24,1,true),new THREE.MeshStandardMaterial({color:0xf5c542,roughness:.5,side:THREE.DoubleSide}));lh.position.set(.05,.34,0);lh.rotation.z=-.5;lamp.add(lb,la,lh);lamp.position.set(-.3,.775,-.7);lamp.traverse(o=>o.castShadow=true);dressed.add(lamp);
+ const lap=new THREE.Mesh(new RoundedBoxGeometry(.34,.02,.23,3,.008),new THREE.MeshStandardMaterial({color:0xb9bec6,metalness:.8,roughness:.35}));lap.position.set(.1,.785,-.5);lap.castShadow=true;dressed.add(lap);
+ for(let i=0;i<4;i++){const bk=new THREE.Mesh(new RoundedBoxGeometry(.2,.03+(i%2)*.012,.14,2,.004),new THREE.MeshStandardMaterial({color:[0xd45b4b,0x3d6ea8,0xe0b84a,0x5aa27a][i],roughness:.8}));bk.position.set(.3,.79+i*.036,-.82);bk.rotation.y=(i-1.5)*.08;bk.castShadow=true;dressed.add(bk)}
+ const pot=new THREE.Mesh(new THREE.CylinderGeometry(.1,.07,.14,20),new THREE.MeshStandardMaterial({color:0xcfa27a,roughness:.8}));pot.position.set(1.3,.07,-1.4);pot.castShadow=true;dressed.add(pot);
+ for(let i=0;i<9;i++){const lf=new THREE.Mesh(new THREE.SphereGeometry(.09,12,8),new THREE.MeshStandardMaterial({color:0x4f8a45,roughness:.7}));lf.scale.set(1,.35,.55);const a=i/9*6.28;lf.position.set(1.3+Math.cos(a)*.08,.25+(i%3)*.1,-1.4+Math.sin(a)*.08);lf.rotation.set(Math.sin(a)*.8,a,.7);lf.castShadow=true;dressed.add(lf)}
+ const chair=new THREE.Group();const seat=new THREE.Mesh(new RoundedBoxGeometry(.42,.05,.42,4,.02),new THREE.MeshStandardMaterial({color:0x2f3a46,roughness:.8}));seat.position.y=.45;const back=new THREE.Mesh(new RoundedBoxGeometry(.42,.4,.05,4,.02),seat.material);back.position.set(0,.7,.2);chair.add(seat,back);for(const sx of[-1,1])for(const sz of[-1,1]){const l=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.45,8),STEEL);l.position.set(sx*.18,.225,sz*.18);chair.add(l)}chair.position.set(.1,0,.1);chair.rotation.y=.4;chair.traverse(o=>o.castShadow=true);dressed.add(chair)}
+dressed.visible=false;
+// ---------- UI y línea de tiempo
+const STEPS=[
+ {t0:9,k:'PASSO 1 DI 5',h:'Struttura laterale',p:'Unisci i montanti alle traverse e fissa con le viti.',tools:['allen']},
+ {t0:15,k:'PASSO 2 DI 5',h:'Doghe del letto',p:'Appoggia le doghe sui supporti, ben allineate.',tools:[]},
+ {t0:21,k:'PASSO 3 DI 5',h:'Scala e protezione',p:'Fissa la scala sul lato corto e la protezione sul lato lungo.',tools:['allen']},
+ {t0:27,k:'PASSO 4 DI 5',h:'Scrivania',p:'Monta i pannelli laterali e poi il piano.',tools:['cac']},
+ {t0:33,k:'PASSO 5 DI 5',h:'Fissaggio al muro',p:'Fissa il letto al muro con le staffe. Controlla cavi e tubi prima di forare.',tools:['tra'],warn:'SICUREZZA: il letto va sempre fissato al muro'}];
+const ICON={allen:['Chiave a brugola','<svg viewBox="0 0 48 40"><path d="M10 30V8h8M10 30h28" stroke="#1f2933" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
+ cac:['Cacciavite','<svg viewBox="0 0 48 40"><rect x="4" y="15" width="18" height="10" rx="4" fill="#0f9d8a"/><path d="M22 20h22" stroke="#1f2933" stroke-width="4" stroke-linecap="round"/></svg>'],
+ tra:['Trapano','<svg viewBox="0 0 48 40"><rect x="6" y="8" width="26" height="12" rx="5" fill="#f2b705"/><rect x="12" y="18" width="9" height="16" rx="3" fill="#1f2933"/><path d="M32 14h12" stroke="#1f2933" stroke-width="3" stroke-linecap="round"/></svg>']};
+const ease=x=>{x=Math.min(1,Math.max(0,x));return 1-Math.pow(1-x,3)};
+const $=id=>document.getElementById(id);let lastUI='';
+function setUI(t){
+ const bar=$('bar');
+ $('title').style.display=t<4?'flex':'none';$('title').style.opacity=t>3.4?Math.max(0,(4-t)/.6):1;
+ $('tag').style.display=(t>=4&&t<44)?'block':'none';
+ $('list').style.display=(t>=4&&t<9)?'block':'none';
+ if(t>=4&&t<9&&lastUI!=='L'){$('list').innerHTML='<h3>COSA TI SERVE</h3><b>4</b>Montanti<br><b>4</b>Traverse<br><b>12</b>Doghe<br><b>1</b>Scala + protezione<br><b>3</b>Pannelli scrivania<br><b>+</b>Viti e 2 staffe a muro<br><br><h3>STRUMENTI</h3>Chiave a brugola · Cacciavite · Trapano';lastUI='L'}
+ const si=STEPS.findIndex((s,i)=>t>=s.t0&&t<(STEPS[i+1]?STEPS[i+1].t0:39));
+ bar.style.display=(si>=0)?'flex':'none';
+ if(si>=0){const s=STEPS[si];const key='S'+si;if(lastUI!==key){lastUI=key;$('num').textContent=si+1;$('k').textContent=s.k;$('h').textContent=s.h;$('p').textContent=s.p;
+  $('tools').innerHTML=s.tools.map(k=>`<div class="tool">${ICON[k][1]}${ICON[k][0]}</div>`).join('')||'<div class="tool">✋<br>A mano</div>';}
+  $('warn').style.display=(s.warn&&t>=s.t0+1.2)?'block':'none';$('warn').textContent=s.warn||''}
+ else $('warn').style.display='none';
+ $('qrc').style.display=(t>=39&&t<44)?'block':'none';$('qrc').style.opacity=ease((t-39)/.6);
+ $('end').style.display=t>=44?'flex':'none';$('end').style.opacity=ease((t-44)/.6);
+}
+// ---------- composer (AO)
+const AO=new URLSearchParams(location.search).get('ao')!=='0';
+let comp=null;
+if(AO){comp=new EffectComposer(R);comp.setPixelRatio(DPR);comp.setSize(W,H);comp.addPass(new RenderPass(sc,cam));
+ const ssao=new SSAOPass(sc,cam,W*DPR,H*DPR);ssao.kernelRadius=.35;ssao.minDistance=.0015;ssao.maxDistance=.08;comp.addPass(ssao);comp.addPass(new OutputPass())}
+window.setTime=function(t){
+ setUI(t);
+ const az=(34+12*Math.sin(t*.22))*Math.PI/180,el=18*Math.PI/180,dist=t<9?8.2:(t>=33&&t<39?6.0:6.4);
+ const ty=.95;cam.position.set(Math.sin(az)*Math.cos(el)*dist+.4,ty+Math.sin(el)*dist,Math.cos(az)*Math.cos(el)*dist);cam.lookAt(.2,ty,0);
+ const show=t>=4;bed.visible=show;
+ for(const p of parts){const st=STEPS[p.step-1].t0;const k=ease((t-(st+.15*(p.i%6)))/1.0);
+  const fl=Math.sin(t*1.2+p.i)*.02*(1-k);
+  p.m.position.copy(p.fin).addScaledVector(p.from,1-k);p.m.position.y+=fl;p.m.scale.setScalar(show?Math.min(1,ease((t-4)/.8)):0.001)}
+ for(const s of screws){const t1=STEPS[s.step-1].t0+s.tOff;const k=ease((t-t1)/.5);s.g.visible=t>=t1-.01;const off=(1-k)*.08;const dir=s.fin.x>=0?1:-1;
+  s.g.position.copy(s.fin);if(s.ax==='x')s.g.position.x+=dir*off;else s.g.position.y+=off;
+  const stepEnd=STEPS[s.step-1].t0+4.4;s.cap.visible=t>=stepEnd;s.hd.visible=s.hole.visible=t<stepEnd}
+ wallL.visible=true;
+ const wk=ease((t-33)/.8);for(const b of brk){b.visible=t>=35;b.position.x=-.53+(1-ease((t-35)/.6))*.2}
+ // puesta en escena final
+ dressed.visible=t>=38.5;const dk=ease((t-38.5)/.9);dressed.scale.setScalar(Math.max(.001,dk));dressed.position.y=(1-dk)*.15;
+ const si=STEPS.findIndex((s,i)=>t>=s.t0&&t<(STEPS[i+1]?STEPS[i+1].t0:39));
+ allen.visible=false;drill.visible=false;ring.visible=false;
+ if(si>=0){const s=STEPS[si],u=t-s.t0;
+  if(s.tools.includes('allen')&&u>2.2&&u<4.4){const sc0=screws.filter(x=>x.step===si+1);const tgt=sc0[Math.min(sc0.length-1,Math.floor((u-2.2)/.5))];
+   if(tgt){allen.visible=true;allen.position.copy(tgt.fin).add(new THREE.Vector3(tgt.fin.x>=0?.08:-.08,0,0));allen.rotation.set(0,0,tgt.fin.x>=0?Math.PI/2:-Math.PI/2);allen.rotateY(u*8);ring.visible=true;ring.position.copy(tgt.fin);ring.lookAt(cam.position);ring.scale.setScalar(1+.25*Math.sin(u*10))}}
+  if(s.tools.includes('tra')&&u>2.0){drill.visible=true;drill.position.set(-.1,1.55,.5);drill.rotation.set(0,-Math.PI/2,0);D.spin.rotation.x=u*18;
+   ring.visible=true;ring.position.set(-.53,1.52,.5);ring.lookAt(cam.position);ring.scale.setScalar(1+.25*Math.sin(u*10))}
+  if(s.tools.includes('cac')&&u>2.2&&u<4.4){ring.visible=true;const q=screws.filter(x=>x.step===4)[Math.floor((u-2.2)/.5)%2]||screws.find(x=>x.step===4);ring.position.copy(q.fin);ring.lookAt(cam.position);ring.scale.setScalar(1+.25*Math.sin(u*10))}}
+ if(comp)comp.render();else R.render(sc,cam);
+ document.body.style.opacity=t>END-.4?Math.max(0,(END-t)/.4):1;
+};
+window.READY=true;window.setTime(0);
+</script></body></html>
