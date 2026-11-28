@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#0b0b0a}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/examples/jsm/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script></head><body>
+<script type="module">
+import * as THREE from 'three';
+import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
+import {buildDrill} from './modelo-taladro.js';
+const W=840,H=900;
+const R=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
+R.setPixelRatio(1);R.setSize(W,H);R.setClearColor(0x0b0b0a);
+R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.05;R.outputColorSpace=THREE.SRGBColorSpace;
+R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
+document.body.appendChild(R.domElement);
+const sc=new THREE.Scene();
+const pm=new THREE.PMREMGenerator(R);sc.environment=pm.fromScene(new RoomEnvironment(),0.04).texture;sc.environmentIntensity=.55;
+const cam=new THREE.PerspectiveCamera(26,W/H,1,400);
+const key=new THREE.DirectionalLight(0xffffff,2.4);key.position.set(22,40,30);key.castShadow=true;key.shadow.mapSize.set(2048,2048);
+Object.assign(key.shadow.camera,{left:-30,right:30,top:30,bottom:-30,near:1,far:120});key.shadow.radius=6;key.shadow.bias=-0.0004;sc.add(key);
+const rim=new THREE.DirectionalLight(0xffc860,1.6);rim.position.set(-30,10,-25);sc.add(rim);
+const fill=new THREE.DirectionalLight(0x8fb0ff,.5);fill.position.set(-20,-5,25);sc.add(fill);
+const D=buildDrill();sc.add(D.group);
+const gt=document.createElement('canvas');gt.width=gt.height=512;{const c=gt.getContext('2d');const gr=c.createRadialGradient(256,256,10,256,256,256);gr.addColorStop(0,'#141413');gr.addColorStop(.55,'#0c0c0b');gr.addColorStop(1,'#0b0b0a');c.fillStyle=gr;c.fillRect(0,0,512,512)}
+const fl=new THREE.Mesh(new THREE.CircleGeometry(60,64),new THREE.MeshBasicMaterial({map:(()=>{const t=new THREE.CanvasTexture(gt);t.colorSpace=THREE.SRGBColorSpace;return t})()}));fl.rotation.x=-Math.PI/2;fl.position.y=D.bottomY-.02;sc.add(fl);
+const sh=new THREE.Mesh(new THREE.CircleGeometry(60,64),new THREE.ShadowMaterial({opacity:.75}));sh.rotation.x=-Math.PI/2;sh.position.y=D.bottomY;sh.receiveShadow=true;sc.add(sh);
+window.view=(az,el,dist,ty)=>{const a=az*Math.PI/180,e=el*Math.PI/180;cam.position.set(Math.sin(a)*Math.cos(e)*dist,ty+Math.sin(e)*dist,Math.cos(a)*Math.cos(e)*dist);cam.lookAt(2,ty,0);R.render(sc,cam)};
+window.READY=true;window.view(60,12,95,-8);
+</script></body></html>

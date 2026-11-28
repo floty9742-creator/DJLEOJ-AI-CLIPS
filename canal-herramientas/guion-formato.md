@@ -25,3 +25,9 @@ El clip original es una pantalla dividida 720x1280: **arriba** la app (3D a la i
 - `pantalla-app.mp4`: solo la mitad de arriba (720x640), sin subtítulos, para componer.
 - `guion-subtitulos.srt`: texto y tiempos de ejemplo. Cámbialo por lo que digas tú.
 - `componer.sh tu-camara.mp4`: pone tu cámara abajo y los subtítulos en el medio.
+
+## Modelo 3D reutilizable
+- `modelo-taladro.js`: el taladro 3D (módulo `buildDrill()`): carcasa amarilla, collar estriado, anillo plateado, mandril, broca helicoidal, mango de goma nervado, gatillo, botón de giro, luz LED y batería "20V 2Ah". Devuelve las partes y los puntos de anclaje (hotspots) para los números.
+- `ver-taladro.html`: visor para mirarlo solo (necesita servir la carpeta, p. ej. `python3 -m http.server`).
+- `app-taladro-3d.html`: la app completa (pestañas, panel, chat).
+Para otra herramienta (martillo, sierra...) se crea un módulo igual, `modelo-martillo.js`, con la misma iluminación y materiales.

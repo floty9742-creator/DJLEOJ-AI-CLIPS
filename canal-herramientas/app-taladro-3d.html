@@ -60,60 +60,53 @@ html,body{width:720px;height:1280px;background:#000;overflow:hidden;font-family:
 </div>
 <div id="cam"><div class="c">&#128100;</div><p>TU CÁMARA AQUÍ</p><small>Pega tu vídeo en esta mitad (720×640)</small></div>
 <div id="tag"></div><div id="cap"></div>
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/examples/jsm/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';
-import {RoundedBoxGeometry} from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/geometries/RoundedBoxGeometry.js';
+import {RoomEnvironment} from 'three/examples/jsm/environments/RoomEnvironment.js';
+import {buildDrill} from './modelo-taladro.js';
 const W=420,H=600;
-const R=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});R.setSize(W,H);R.setPixelRatio(1);R.setClearColor(0x0b0b0a);
+const R=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});R.setPixelRatio(1);R.setSize(W,H);R.setClearColor(0x0b0b0a);
+R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.05;R.outputColorSpace=THREE.SRGBColorSpace;R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
 document.getElementById('view').appendChild(R.domElement);
 const sc=new THREE.Scene();const cam=new THREE.PerspectiveCamera(30,W/H,.1,100);
-sc.add(new THREE.HemisphereLight(0xfff2d6,0x15150f,1.2));
-const k=new THREE.DirectionalLight(0xffffff,2.6);k.position.set(4,6,5);sc.add(k);
-const rm=new THREE.DirectionalLight(0xffb020,1.4);rm.position.set(-5,2,-4);sc.add(rm);
-const Y=()=>new THREE.MeshStandardMaterial({color:0xf5b800,roughness:.4,metalness:.1});
+const pm=new THREE.PMREMGenerator(R);sc.environment=pm.fromScene(new RoomEnvironment(),0.04).texture;sc.environmentIntensity=.55;
+const k=new THREE.DirectionalLight(0xffffff,2.4);k.position.set(5,10,8);k.castShadow=true;k.shadow.mapSize.set(2048,2048);
+Object.assign(k.shadow.camera,{left:-8,right:8,top:8,bottom:-8,near:1,far:40});k.shadow.radius=5;k.shadow.bias=-0.0004;sc.add(k);
+const rm=new THREE.DirectionalLight(0xffc860,1.6);rm.position.set(-8,3,-6);sc.add(rm);
+const fillL=new THREE.DirectionalLight(0x8fb0ff,.5);fillL.position.set(-5,-1,6);sc.add(fillL);
 const D=(c=0x1c1c1a)=>new THREE.MeshStandardMaterial({color:c,roughness:.6,metalness:.25});
-const S=()=>new THREE.MeshStandardMaterial({color:0xc9ccd2,roughness:.25,metalness:.9});
-const drill=new THREE.Group();sc.add(drill);const P={};
-const add=(n,m,x,y,z)=>{m.position.set(x,y,z);drill.add(m);P[n]=m;return m};
-add('body',new THREE.Mesh(new RoundedBoxGeometry(2.4,1.05,.95,6,.28),Y()),0,.55,0);
-add('handle',new THREE.Mesh(new RoundedBoxGeometry(.8,1.9,.85,6,.25),Y()),-.35,-.75,0).rotation.z=.12;
-add('grip',new THREE.Mesh(new RoundedBoxGeometry(.82,1,.87,6,.22),D(0x232321)),-.4,-.9,0).rotation.z=.12;
-add('battery',new THREE.Mesh(new RoundedBoxGeometry(1.7,.6,1.1,6,.15),Y()),-.55,-1.95,0);
-add('b2',new THREE.Mesh(new RoundedBoxGeometry(1.5,.2,1.12,4,.06),D()),-.55,-1.95,0);
-add('trigger',new THREE.Mesh(new RoundedBoxGeometry(.3,.6,.35,4,.08),D(0x121212)),.15,-.15,0);
-add('speed',new THREE.Mesh(new RoundedBoxGeometry(.9,.22,.5,4,.06),D(0x2a2a28)),-.25,1.17,0);
-add('fwd',new THREE.Mesh(new RoundedBoxGeometry(.4,.12,.6,3,.04),D(0x2a2a28)),.1,.15,0);
-const mo=new THREE.Group();mo.position.set(1.55,.55,0);drill.add(mo);
-const ring=new THREE.Mesh(new THREE.CylinderGeometry(.46,.46,.34,48),D(0x2b2b2a));ring.rotation.z=Math.PI/2;ring.position.set(-.3,0,0);mo.add(ring);P.ring=ring;
-for(let i=0;i<24;i++){const a=i/24*Math.PI*2;const r=new THREE.Mesh(new THREE.BoxGeometry(.34,.04,.04),D(0xf5b800));r.position.set(-.3,Math.cos(a)*.47,Math.sin(a)*.47);r.rotation.x=-a;mo.add(r)}
-const chuck=new THREE.Mesh(new THREE.CylinderGeometry(.4,.34,.75,48),S());chuck.rotation.z=Math.PI/2;chuck.position.set(.35,0,0);mo.add(chuck);P.chuck=chuck;
-const bit=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,1.9,24),S());bit.rotation.z=Math.PI/2;bit.position.set(1.65,0,0);mo.add(bit);
-const sp=new THREE.Group();for(let i=0;i<14;i++){const s=new THREE.Mesh(new THREE.BoxGeometry(.06,.16,.02),S());s.position.set(.9+i*.12,0,0);s.rotation.x=i*.7;sp.add(s)}mo.add(sp);
+const drill=new THREE.Group();sc.add(drill);
+const DR=buildDrill();DR.group.scale.setScalar(.21);DR.group.position.set(-.2,1.0,0);drill.add(DR.group);
+const gt=document.createElement('canvas');gt.width=gt.height=512;{const c=gt.getContext('2d');const gr=c.createRadialGradient(256,256,10,256,256,256);gr.addColorStop(0,'#191917');gr.addColorStop(.55,'#0d0d0c');gr.addColorStop(1,'#0b0b0a');c.fillStyle=gr;c.fillRect(0,0,512,512)}
+const gtex=new THREE.CanvasTexture(gt);gtex.colorSpace=THREE.SRGBColorSpace;
+const fl=new THREE.Mesh(new THREE.CircleGeometry(60,64),new THREE.MeshBasicMaterial({map:gtex}));fl.rotation.x=-Math.PI/2;fl.position.y=DR.bottomY-.02;DR.group.add(fl);
+const shd=new THREE.Mesh(new THREE.CircleGeometry(60,64),new THREE.ShadowMaterial({opacity:.75}));shd.rotation.x=-Math.PI/2;shd.position.y=DR.bottomY;shd.receiveShadow=true;DR.group.add(shd);
 // wall scene
 const wall=new THREE.Group();sc.add(wall);
-const gray=new THREE.MeshStandardMaterial({color:0xb9b9b4,roughness:.9});
+const gray=new THREE.MeshStandardMaterial({color:0x8a8a84,roughness:.95});
 const w1=new THREE.Mesh(new THREE.BoxGeometry(3.6,4.4,.3),gray);wall.add(w1);
-const brick=new THREE.Mesh(new THREE.BoxGeometry(.7,4.4,.32),new THREE.MeshStandardMaterial({color:0xc98a7c,roughness:.9}));brick.position.set(-1.45,0,.01);wall.add(brick);
-const out=new THREE.Mesh(new THREE.BoxGeometry(.55,.75,.08),new THREE.MeshStandardMaterial({color:0xf0f0ec}));out.position.set(-.7,.2,.19);wall.add(out);
-for(const y of [.35,0]){const s=new THREE.Mesh(new THREE.BoxGeometry(.22,.22,.02),D(0x555));s.position.set(-.7,y+.05,.24);wall.add(s)}
+const brick=new THREE.Mesh(new THREE.BoxGeometry(.7,4.4,.32),new THREE.MeshStandardMaterial({color:0xa86a5c,roughness:.9}));brick.position.set(-1.45,0,.01);wall.add(brick);
+const out=new THREE.Mesh(new THREE.BoxGeometry(.55,.75,.08),new THREE.MeshStandardMaterial({color:0xcfcfca}));out.position.set(-.7,.2,.19);wall.add(out);
+for(const y of [.35,0]){const s=new THREE.Mesh(new THREE.BoxGeometry(.22,.22,.02),D(0x222222));s.position.set(-.7,y+.05,.24);wall.add(s)}
 const mk=new THREE.Mesh(new THREE.SphereGeometry(.09,16,16),new THREE.MeshBasicMaterial({color:0x22c55e}));mk.position.set(.95,.2,.2);wall.add(mk);
-const ln=new THREE.Mesh(new THREE.BoxGeometry(1.65,.03,.03),new THREE.MeshBasicMaterial({color:0x22c55e}));ln.position.set(.12,.2,.2);wall.add(ln);
-wall.position.set(1.4,.5,-1);
+const ln=new THREE.Mesh(new THREE.BoxGeometry(1.65,.06,.03),new THREE.MeshBasicMaterial({color:0x4ade80}));ln.position.set(.12,.2,.2);wall.add(ln);
+wall.position.set(2.7,.5,-1);
 // concrete pillar
 const cn=document.createElement('canvas');cn.width=cn.height=256;const cx=cn.getContext('2d');cx.fillStyle='#bdbdb8';cx.fillRect(0,0,256,256);
 for(let i=0;i<1400;i++){cx.fillStyle=`rgba(${60+Math.random()*120|0},${60+Math.random()*110|0},${50+Math.random()*100|0},.5)`;cx.fillRect(Math.random()*256,Math.random()*256,1+Math.random()*3,1+Math.random()*3)}
 const ctx=new THREE.CanvasTexture(cn);
 const pil=new THREE.Group();sc.add(pil);
-pil.add(new THREE.Mesh(new THREE.BoxGeometry(1.7,4.2,1.2),new THREE.MeshStandardMaterial({map:ctx,roughness:.95})));
+pil.add(new THREE.Mesh(new THREE.BoxGeometry(1.7,4.2,1.2),new THREE.MeshStandardMaterial({map:ctx,color:0x9c9c98,roughness:.95})));
 const cab=new THREE.Mesh(new THREE.BoxGeometry(.12,4.22,.12),new THREE.MeshStandardMaterial({color:0x8a4b24}));cab.position.set(0.05,0,.55);pil.add(cab);
-pil.position.set(1.7,.3,-1.5);
-const hp={1:[1.9,.9,.5],2:[1.25,1.05,.5],3:[-.25,1.35,.2],4:[.1,.25,.55],5:[.15,-.1,.5],6:[-.55,-1.95,.6]};
+pil.position.set(2.1,.3,-1.5);
+const hp=DR.hot;
+
 const hot=document.getElementById('hot');const hs={};
-for(const i of [1,2,3,4,5,6]){const e=document.createElement('div');e.className='h';e.textContent=i;hot.appendChild(e);hs[i]=e}
-const ITEMS=[['Mandril','Aquí entra la broca. Gira con la mano hasta que haga clic.'],['Anillo de modo','Del 1 al 15 es para atornillar; después viene la broca (taladro) y el martillo.'],['Velocidad 1 · 2','Atrás: lento y con fuerza, para tornillos. Adelante: rápido, para huecos.'],['Botón de giro','Derecha: atornilla y perfora. Izquierda: saca tornillos.'],['Gatillo','Más a fondo, más rápido. Empieza despacio.'],['Batería 20 V','Entra deslizando hasta el clic. Cárgala antes de empezar.']];
+for(const i of [1,2,3,4,5,6,7]){const e=document.createElement('div');e.className='h';e.textContent=i;hot.appendChild(e);hs[i]=e}
+const ITEMS=[['Mandril','Aquí entra la broca. Gíralo con la mano para abrir o cerrar, hasta que haga clic-clic.'],['Anillo de modo','Del 1 al 15 es para atornillar; después vienen la broca (taladrar) y el martillo. Gíralo hasta que lo que quieres quede frente a la flechita.'],['Velocidad 1 · 2','Hacia atrás es la 1: lento y con fuerza, para tornillos. Hacia el mandril es la 2: rápido, para huecos.'],['Botón de giro','Oprímelo por el lado derecho para apretar y por el izquierdo para aflojar. En el medio queda bloqueado: así cambias la broca sin peligro.'],['Gatillo','Entre más lo hundes, más rápido gira. Empieza siempre suave.'],['Batería 20 V','Entra deslizando hasta el clic; para sacarla, aprieta el botón de adelante. Sus 3 lucecitas dicen cuánta carga le queda.'],['Luz','Está encima del gatillo. Se prende sola al apretarlo y se queda prendida unos segundos, para que veas dónde taladras.']];
 const panel=document.getElementById('panel');
-const glowMap={1:'chuck',2:'ring',3:'speed',4:'fwd',5:'trigger',6:'battery'};
+
 const ease=x=>x<0?0:x>1?1:x*x*(3-2*x);
 // timeline
 const T1=[19,28.5],T2=[28.5,38.0];
@@ -145,26 +138,28 @@ window.setTime=function(t){
  chatShow(t);
  const tb=tab(t);for(let i=0;i<3;i++)document.getElementById('t'+i).className='tab'+(i===tb?' on':'');
  // active item in tab0
- let act=0;if(tb===0&&t>=9.4)act=Math.min(6,1+Math.floor((t-9.4)/1.6));
+ let act=0;if(tb===0&&t>=9.4)act=Math.min(7,1+Math.floor((t-9.4)/1.4));
  const key=tb+'|'+act+'|'+(tb===1?Math.floor((t-T1[0])/1):'')+(tb===2?Math.floor((t-T2[0])/1):'');
  if(key!==lastKey){lastKey=key;panel.innerHTML=tb===0?html0(act):tb===1?html1(t):html2(t)}
  // visibility
- drill.visible=tb===0||tb===1||tb===2;wall.visible=tb===1;pil.visible=tb===2;
+ drill.visible=true;wall.visible=tb===1;pil.visible=tb===2;
  // drill transform per tab
- for(const n in P)if(P[n].material&&P[n].material.emissive)P[n].material.emissive.setRGB(0,0,0);
+ for(const kk in DR.glowable)if(kk!=='7')for(const m of DR.glowable[kk])m.material.emissive.setRGB(0,0,0);
+ DR.parts.led.material.emissiveIntensity=.35;fl.visible=shd.visible=(tb===0);
  let pulse=.35+.25*Math.sin(t*6);
- if(tb===0&&act&&P[glowMap[act]])P[glowMap[act]].material.emissive.setRGB(pulse*.9,pulse*.6,0);
+ if(tb===0&&act&&act!==7)for(const m of DR.glowable[act])m.material.emissive.setRGB(pulse*.9,pulse*.6,0);
+ if(tb===0&&act===7)DR.parts.led.material.emissiveIntensity=1.2+pulse;
  if(tb===0){drill.scale.setScalar(1);drill.position.set(0,Math.sin(t*1.2)*.04,0);drill.rotation.set(0,0,0);
-  const rot=.5+Math.sin(t*.35)*.5+(act?[0,.0,.1,.3,.5,.7,.9][act]*.5:0);const d=11.5;
+  const rot=.5+Math.sin(t*.35)*.5+(act?[0,0,.1,.3,.5,.7,.9,1.0][act]*.5:0);const d=11.5;
   cam.position.set(.4+Math.sin(rot)*d,.7+1.2,Math.cos(rot)*d);cam.lookAt(.2,-.3,0)}
- if(tb===1){drill.scale.setScalar(.55);drill.position.set(-1.7,-1.1,1.2);drill.rotation.set(0,.5,0);cam.position.set(1.2,1.2,12.5);cam.lookAt(.6,.2,0)}
- if(tb===2){drill.scale.setScalar(.6);drill.position.set(-1.9,-.6,1);drill.rotation.set(0,.6,0);cam.position.set(1.4,.9,12.5+Math.sin(t*.4)*.3);cam.lookAt(.4,.1,0);pil.rotation.y=-.35+Math.sin(t*.6)*.12}
+ if(tb===1){drill.scale.setScalar(.42);drill.position.set(-.45,-.23,1.0);drill.rotation.set(0,.25,0);cam.position.set(.8,1.0,12.5);cam.lookAt(.8,.2,0)}
+ if(tb===2){drill.scale.setScalar(.42);drill.position.set(-.45,-.23,1.0);drill.rotation.set(0,.25,0);cam.position.set(.8,.9,12.5+Math.sin(t*.4)*.3);cam.lookAt(.8,.2,0);pil.rotation.y=-.35+Math.sin(t*.6)*.12}
  // spin
- let spin=0;if(tb===0&&act>=5)spin=(t-9.4-4*1.6)*3;sp.rotation.x=spin;chuck.rotation.x=spin;
+ let spin=0;if(tb===0&&act>=5)spin=(t-9.4-4*1.4)*3;DR.spin.rotation.x=spin;
  R.render(sc,cam);
  // hotspots
- for(const i of [1,2,3,4,5,6]){const e=hs[i];if(tb!==0){e.style.display='none';continue}e.style.display='flex';
-  const v=new THREE.Vector3(...hp[i]);drill.localToWorld(v);v.project(cam);e.style.left=((v.x*.5+.5)*W)+'px';e.style.top=((-v.y*.5+.5)*H)+'px';
+ for(const i of [1,2,3,4,5,6,7]){const e=hs[i];if(tb!==0){e.style.display='none';continue}e.style.display='flex';
+  const v=new THREE.Vector3(...hp[i]);DR.group.localToWorld(v);v.project(cam);e.style.left=((v.x*.5+.5)*W)+'px';e.style.top=((-v.y*.5+.5)*H)+'px';
   const on=act===i;e.style.transform='scale('+(on?1.5+.15*Math.sin(t*7):1)+')';e.style.opacity=(act&&!on)?.55:1}
  // cursor
  let a=CUR[0],b=CUR[CUR.length-1];for(let j=0;j<CUR.length-1;j++)if(t>=CUR[j][0]&&t<CUR[j+1][0]){a=CUR[j];b=CUR[j+1];break}
