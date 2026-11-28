@@ -1,139 +1,158 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=720">
-<title>Mi taladro</title>
+<html lang="es"><head><meta charset="utf-8"><title>Mi taladro</title>
 <style>
-:root{--y:#f5b800;--bg:#0d0d0b;--t:#f4f1e8}
+:root{--y:#f5b800;--t:#e9e6da;--m:#8d897b}
 *{box-sizing:border-box;margin:0}
-html,body{width:720px;height:1280px;background:var(--bg);overflow:hidden;font-family:"DejaVu Sans","Liberation Sans",Arial,sans-serif;color:var(--t)}
-#top{position:absolute;left:0;top:0;width:720px;height:96px;display:flex;align-items:center;gap:14px;padding:0 28px;border-bottom:1px solid #2a2a24;background:#11110e}
-#top b{font-size:22px;letter-spacing:2px}
-.chip{font-size:18px;padding:7px 14px;border-radius:8px;background:#22221c;color:#bdb9aa}
-.chip.on{background:var(--y);color:#111;font-weight:700}
-#view{position:absolute;left:0;top:96px;width:720px;height:760px}
-canvas{display:block}
-#hot{position:absolute;left:0;top:96px;width:720px;height:760px;pointer-events:none}
-.h{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:var(--y);color:#111;font-weight:800;font-size:24px;display:flex;align-items:center;justify-content:center;border:3px solid #111;transition:none}
-.h.off{opacity:.28;transform:scale(.8)}
-.lab{position:absolute;background:#111;border:2px solid var(--y);color:var(--t);font-weight:700;font-size:22px;padding:6px 12px;border-radius:8px;white-space:nowrap}
-#panel{position:absolute;left:24px;right:24px;top:866px;height:250px;background:#15150f;border:1px solid #2e2e25;border-radius:18px;padding:22px 26px}
-#panel small{font-size:18px;color:var(--y);letter-spacing:2px;font-weight:700}
-#panel h2{font-size:34px;margin:6px 0 10px;line-height:1.15}
-#panel p{font-size:23px;line-height:1.35;color:#d7d3c4}
-#warn{position:absolute;left:24px;right:24px;top:1128px;height:80px;border-radius:14px;background:#3a1210;border:2px solid #ff4b3e;display:flex;align-items:center;padding:0 22px;font-size:23px;font-weight:700;gap:14px}
-#cap{position:absolute;left:0;width:720px;top:770px;text-align:center;font-size:76px;font-weight:900;color:#fff;-webkit-text-stroke:10px #000;paint-order:stroke fill;letter-spacing:1px;text-transform:lowercase}
-#tag{position:absolute;left:34px;top:130px;background:#e11d1d;color:#fff;font-weight:800;font-size:34px;line-height:1.2;padding:12px 22px;border-radius:10px;text-align:center;box-shadow:0 6px 0 #7a0e0e}
-#hook{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:rgba(13,13,11,.0)}
-#hook h1{font-size:86px;text-align:center;line-height:1.05;text-shadow:0 6px 0 #000}
-#hook h1 em{color:var(--y);font-style:normal}
-#cta{position:absolute;inset:0;background:rgba(13,13,11,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;text-align:center}
-#cta h1{font-size:72px;line-height:1.1}#cta h1 em{color:var(--y);font-style:normal}
-#cta p{font-size:34px;color:#d7d3c4}
+html,body{width:720px;height:1280px;background:#000;overflow:hidden;font-family:"DejaVu Sans","Liberation Sans",Arial,sans-serif;color:var(--t)}
+#app{position:absolute;left:0;top:0;width:720px;height:640px;background:#0b0b0a;overflow:hidden}
+#hd{height:40px;display:flex;align-items:center;gap:10px;padding:0 12px;border-bottom:1px solid #1f1f1a}
+#hd b{font-size:13px;letter-spacing:1px}
+.pill{font-size:8px;background:var(--y);color:#111;font-weight:800;padding:2px 6px;border-radius:3px}
+.tab{font-size:11px;padding:5px 9px;border-radius:5px;color:var(--m)}
+.tab.on{background:var(--y);color:#111;font-weight:800}
+#view{position:absolute;left:0;top:40px;width:420px;height:600px}
+#hot{position:absolute;left:0;top:40px;width:420px;height:600px;pointer-events:none}
+.h{position:absolute;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;background:var(--y);color:#111;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;border:2px solid #111}
+#panel{position:absolute;left:424px;top:40px;width:290px;height:596px;padding:8px 4px 0 6px;font-size:10px}
+.k{font-size:8px;color:var(--m);letter-spacing:1px}
+#panel h2{font-size:17px;line-height:1.1;margin:3px 0 4px;letter-spacing:.3px}
+.sub{font-size:9px;color:var(--m);margin-bottom:8px}
+.seg{display:flex;gap:4px;margin-bottom:8px}.seg div{flex:1;text-align:center;padding:6px 0;border-radius:5px;background:#1a1a15;font-size:9px;color:var(--m)}.seg div.on{background:var(--y);color:#111;font-weight:800}
+.it{display:flex;gap:8px;margin-bottom:9px;padding:4px;border-radius:6px}
+.it.on{background:#1f1d12;outline:1px solid #4a3d0c}
+.it i{flex:none;width:15px;height:15px;border-radius:50%;border:1.5px solid #8d897b;font-style:normal;font-size:8px;display:flex;align-items:center;justify-content:center}
+.it.on i{background:var(--y);color:#111;border-color:var(--y);font-weight:800}
+.it b{display:block;font-size:11px;margin-bottom:2px}.it span{color:var(--m);font-size:9.5px;line-height:1.35;display:block}
+.box{background:#14140f;border:1px solid #26261e;border-radius:6px;padding:8px;margin:6px 0;font-size:10px;line-height:1.4;color:#cfcbbc}
+.red{border-color:#7a1f19;background:#1c0d0c;color:#ffb3ab}
+.chips{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0}.chips div{padding:4px 7px;border-radius:5px;background:#1a1a15;color:var(--m);font-size:9px}.chips div.on{background:#e8e4d6;color:#111;font-weight:800}
+.row{display:flex;gap:10px;font-size:10px;margin:3px 0}.row s{text-decoration:none;color:var(--m);width:62px;font-size:8px;letter-spacing:1px}
+#cur{position:absolute;width:22px;height:22px;z-index:9}
+#cam{position:absolute;left:0;top:640px;width:720px;height:640px;background:linear-gradient(160deg,#2a3340,#12161c);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:#8fa0b5}
+#cam .c{width:190px;height:190px;border-radius:50%;border:4px dashed #5d6f86;display:flex;align-items:center;justify-content:center;font-size:80px}
+#cam p{font-size:28px;font-weight:800;letter-spacing:2px}#cam small{font-size:18px;color:#6f8096}
+#cap{position:absolute;left:0;width:720px;top:560px;text-align:center;font-size:64px;font-weight:900;color:#fff;-webkit-text-stroke:9px #000;paint-order:stroke fill;text-transform:lowercase;z-index:20}
+#tag{position:absolute;left:28px;top:476px;background:#e11d1d;color:#fff;font-weight:800;font-size:33px;line-height:1.2;padding:10px 20px;border-radius:10px;text-align:center;z-index:25;box-shadow:0 6px 0 #7a0e0e}
 </style></head><body>
-<div id="top"><b>MI TALADRO</b><span class="chip on">Partes</span><span class="chip">Hacer un hueco</span><span class="chip">Seguridad</span></div>
-<div id="view"></div><div id="hot"></div>
-<div id="tag"></div>
-<div id="panel"><small id="pk"></small><h2 id="pt"></h2><p id="pp"></p></div>
-<div id="warn"><span>&#9888;</span><span id="wt"></span></div>
-<div id="hook"></div><div id="cta" style="display:none"></div>
-<div id="cap"></div>
+<div id="app">
+ <div id="hd"><b>MI TALADRO</b><span class="pill">EJEMPLO · 20 V</span><span class="tab on" id="t0">El taladro</span><span class="tab" id="t1">Hacer un hueco</span><span class="tab" id="t2">Según la pared</span><span class="tab">La estantería</span></div>
+ <div id="view"></div><div id="hot"></div>
+ <div id="panel"></div>
+ <svg id="cur" viewBox="0 0 24 24"><path d="M3 2l16 9-7 2-3 7z" fill="#fff" stroke="#000" stroke-width="1.5"/></svg>
+</div>
+<div id="cam"><div class="c">&#128100;</div><p>TU CÁMARA AQUÍ</p><small>Pega tu vídeo en esta mitad (720×640)</small></div>
+<div id="tag"></div><div id="cap"></div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import * as THREE from 'three';
 import {RoundedBoxGeometry} from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/geometries/RoundedBoxGeometry.js';
-const W=720,H=760;
-const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
-renderer.setSize(W,H);renderer.setPixelRatio(1);renderer.setClearColor(0x0d0d0b);
-document.getElementById('view').appendChild(renderer.domElement);
-const scene=new THREE.Scene();
-const cam=new THREE.PerspectiveCamera(32,W/H,0.1,100);
-scene.add(new THREE.HemisphereLight(0xfff2d6,0x15150f,1.1));
-const key=new THREE.DirectionalLight(0xffffff,2.6);key.position.set(4,6,5);scene.add(key);
-const rim=new THREE.DirectionalLight(0xffb020,1.6);rim.position.set(-5,2,-4);scene.add(rim);
-const fill=new THREE.PointLight(0x6aa0ff,10,20);fill.position.set(-3,-2,4);scene.add(fill);
-const Y=()=>new THREE.MeshStandardMaterial({color:0xf5b800,roughness:.42,metalness:.1,emissive:0x000000});
-const D=(c=0x1c1c1a)=>new THREE.MeshStandardMaterial({color:c,roughness:.6,metalness:.25,emissive:0x000000});
-const S=()=>new THREE.MeshStandardMaterial({color:0xc9ccd2,roughness:.25,metalness:.9,emissive:0x000000});
-const drill=new THREE.Group();scene.add(drill);
-const parts={};
-function add(name,mesh,x,y,z){mesh.position.set(x,y,z);drill.add(mesh);parts[name]=mesh;return mesh}
-add('body',new THREE.Mesh(new RoundedBoxGeometry(2.4,1.05,0.95,6,0.28),Y()),0,0.55,0);
-const handle=add('handle',new THREE.Mesh(new RoundedBoxGeometry(0.8,1.9,0.85,6,0.25),Y()),-0.35,-0.75,0);handle.rotation.z=0.12;
-add('grip',new THREE.Mesh(new RoundedBoxGeometry(0.82,1.0,0.87,6,0.22),D(0x232321)),-0.4,-0.9,0).rotation.z=0.12;
-add('battery',new THREE.Mesh(new RoundedBoxGeometry(1.7,0.6,1.1,6,0.15),Y()),-0.55,-1.95,0);
-add('battery2',new THREE.Mesh(new RoundedBoxGeometry(1.5,0.2,1.12,4,0.06),D()),-0.55,-1.95,0);
-add('trigger',new THREE.Mesh(new RoundedBoxGeometry(0.3,0.6,0.35,4,0.08),D(0x121212)),0.15,-0.15,0.0);
-add('speed',new THREE.Mesh(new RoundedBoxGeometry(0.9,0.22,0.5,4,0.06),D(0x2a2a28)),-0.25,1.17,0);
-add('fwd',new THREE.Mesh(new RoundedBoxGeometry(0.4,0.12,0.6,3,0.04),D(0x2a2a28)),0.1,0.15,0);
-const motor=new THREE.Group();motor.position.set(1.55,0.55,0);drill.add(motor);
-const ringM=new THREE.Mesh(new THREE.CylinderGeometry(0.46,0.46,0.34,48),D(0x2b2b2a));ringM.rotation.z=Math.PI/2;ringM.position.set(-0.3,0,0);motor.add(ringM);parts.ring=ringM;
-for(let i=0;i<24;i++){const a=i/24*Math.PI*2;const r=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.04,0.04),D(0xf5b800));r.position.set(-0.3,Math.cos(a)*0.47,Math.sin(a)*0.47);r.rotation.x=-a;ringM.parent.add(r)}
-const chuck=new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.34,0.75,48),S());chuck.rotation.z=Math.PI/2;chuck.position.set(0.35,0,0);motor.add(chuck);parts.chuck=chuck;
-const bit=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,1.9,24),S());bit.rotation.z=Math.PI/2;bit.position.set(1.65,0,0);motor.add(bit);parts.bit=bit;
-const spiral=new THREE.Group();for(let i=0;i<14;i++){const s=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.16,0.02),S());s.position.set(0.9+i*0.12,0,0);s.rotation.x=i*0.7;spiral.add(s)}motor.add(spiral);
-const spin=[chuck,bit,spiral];
-const floor=new THREE.GridHelper(14,28,0x2a2a22,0x1b1b16);floor.position.y=-2.35;scene.add(floor);
-const hp={1:new THREE.Vector3(1.9,0.9,0.5),2:new THREE.Vector3(-0.25,1.35,0.2),3:new THREE.Vector3(1.25,1.05,0.5),4:new THREE.Vector3(0.15,-0.1,0.5),5:new THREE.Vector3(-0.55,-1.95,0.6)};
-const hotEl=document.getElementById('hot');
-const hs={},labs={};
-const LABEL={1:'Mandril',2:'Velocidad',3:'Torque',4:'Gatillo',5:'Batería 20V'};
-for(const k of [1,2,3,4,5]){const e=document.createElement('div');e.className='h';e.textContent=k;hotEl.appendChild(e);hs[k]=e;const l=document.createElement('div');l.className='lab';l.textContent=LABEL[k];hotEl.appendChild(l);labs[k]=l}
-// timeline
-const SEC=[
- {t:0,  k:0,rot:0.55,pitch:0.25,dist:11,tx:0.4,ty:0,spd:0},
- {t:3.2,k:1,rot:0.15,pitch:0.12,dist:7.5,tx:1.5,ty:0.6,spd:0,kick:'PARTE 1 · EL MANDRIL',title:'Aquí se sujeta la broca',body:'Gíralo a la izquierda para abrirlo. Mete la broca recta y gíralo a la derecha hasta que apriete.'},
- {t:8.4,k:2,rot:-0.2,pitch:0.55,dist:8,tx:-0.2,ty:1.0,spd:0,kick:'PARTE 2 · VELOCIDAD',title:'Selector 1 y 2',body:'1 = lento y con fuerza, para atornillar. 2 = rápido, para perforar con brocas pequeñas.'},
- {t:13.6,k:3,rot:0.45,pitch:0.1,dist:7.2,tx:1.2,ty:0.7,spd:0,kick:'PARTE 3 · TORQUE',title:'El anillo con números',body:'Número bajo para tornillos delicados. El ícono del taladro, para perforar sin que patine.'},
- {t:18.8,k:4,rot:0.9,pitch:0.15,dist:7.5,tx:0.2,ty:0.2,spd:1,kick:'PARTE 4 · GATILLO',title:'Más presión, más velocidad',body:'Empieza suave para no resbalar. Aprieta más cuando la broca ya esté entrando.'},
- {t:24.0,k:5,rot:0.2,pitch:0.05,dist:8.6,tx:-0.4,ty:-1.0,spd:0,kick:'PARTE 5 · BATERÍA',title:'20 voltios',body:'Cárgala antes de empezar y no la dejes vacía por días: dura mucho más.'},
- {t:29.2,k:0,rot:-0.5,pitch:0.2,dist:10,tx:0.4,ty:0,spd:0,warn:'Antes de perforar: revisa cables y tuberías. Usa gafas.',kick:'ANTES DE EMPEZAR',title:'Seguridad primero',body:'Mide, marca el punto y confirma qué hay detrás de la pared.'},
- {t:34.0,k:0,rot:-0.9,pitch:0.25,dist:11,tx:0.4,ty:0,spd:0,cta:true,kick:'',title:'',body:''}
-];
-const END=38;
-const WORDS="¿sabes usar un taladro de verdad? mira cada parte. el mandril sujeta la broca. giralo a la izquierda, mete la broca, y apriétalo. el selector de velocidad: uno para atornillar, dos para perforar. el anillo de torque: número bajo para tornillos, el ícono del taladro para perforar. el gatillo: empieza suave, y aprieta más cuando la broca entre. la batería de veinte voltios: cárgala antes de empezar. y antes de perforar, revisa que no haya cables ni tuberías. usa gafas siempre. sígueme y aprende una herramienta nueva cada semana.".split(' ');
-// word timings: spread words across segments proportional by hand-set anchor times
-const ANCH=[[0,3.2,0,5],[3.2,8.4,5,19],[8.4,13.6,19,34],[13.6,18.8,34,50],[18.8,24,50,62],[24,29.2,62,72],[29.2,34,72,86],[34,37.5,86,WORDS.length]];
-const WT=[];for(const [a,b,i0,i1] of ANCH){const n=i1-i0;for(let i=0;i<n;i++)WT.push([a+(b-a)*i/n,a+(b-a)*(i+1)/n,WORDS[i0+i]])}
+const W=420,H=600;
+const R=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});R.setSize(W,H);R.setPixelRatio(1);R.setClearColor(0x0b0b0a);
+document.getElementById('view').appendChild(R.domElement);
+const sc=new THREE.Scene();const cam=new THREE.PerspectiveCamera(30,W/H,.1,100);
+sc.add(new THREE.HemisphereLight(0xfff2d6,0x15150f,1.2));
+const k=new THREE.DirectionalLight(0xffffff,2.6);k.position.set(4,6,5);sc.add(k);
+const rm=new THREE.DirectionalLight(0xffb020,1.4);rm.position.set(-5,2,-4);sc.add(rm);
+const Y=()=>new THREE.MeshStandardMaterial({color:0xf5b800,roughness:.4,metalness:.1});
+const D=(c=0x1c1c1a)=>new THREE.MeshStandardMaterial({color:c,roughness:.6,metalness:.25});
+const S=()=>new THREE.MeshStandardMaterial({color:0xc9ccd2,roughness:.25,metalness:.9});
+const drill=new THREE.Group();sc.add(drill);const P={};
+const add=(n,m,x,y,z)=>{m.position.set(x,y,z);drill.add(m);P[n]=m;return m};
+add('body',new THREE.Mesh(new RoundedBoxGeometry(2.4,1.05,.95,6,.28),Y()),0,.55,0);
+add('handle',new THREE.Mesh(new RoundedBoxGeometry(.8,1.9,.85,6,.25),Y()),-.35,-.75,0).rotation.z=.12;
+add('grip',new THREE.Mesh(new RoundedBoxGeometry(.82,1,.87,6,.22),D(0x232321)),-.4,-.9,0).rotation.z=.12;
+add('battery',new THREE.Mesh(new RoundedBoxGeometry(1.7,.6,1.1,6,.15),Y()),-.55,-1.95,0);
+add('b2',new THREE.Mesh(new RoundedBoxGeometry(1.5,.2,1.12,4,.06),D()),-.55,-1.95,0);
+add('trigger',new THREE.Mesh(new RoundedBoxGeometry(.3,.6,.35,4,.08),D(0x121212)),.15,-.15,0);
+add('speed',new THREE.Mesh(new RoundedBoxGeometry(.9,.22,.5,4,.06),D(0x2a2a28)),-.25,1.17,0);
+add('fwd',new THREE.Mesh(new RoundedBoxGeometry(.4,.12,.6,3,.04),D(0x2a2a28)),.1,.15,0);
+const mo=new THREE.Group();mo.position.set(1.55,.55,0);drill.add(mo);
+const ring=new THREE.Mesh(new THREE.CylinderGeometry(.46,.46,.34,48),D(0x2b2b2a));ring.rotation.z=Math.PI/2;ring.position.set(-.3,0,0);mo.add(ring);P.ring=ring;
+for(let i=0;i<24;i++){const a=i/24*Math.PI*2;const r=new THREE.Mesh(new THREE.BoxGeometry(.34,.04,.04),D(0xf5b800));r.position.set(-.3,Math.cos(a)*.47,Math.sin(a)*.47);r.rotation.x=-a;mo.add(r)}
+const chuck=new THREE.Mesh(new THREE.CylinderGeometry(.4,.34,.75,48),S());chuck.rotation.z=Math.PI/2;chuck.position.set(.35,0,0);mo.add(chuck);P.chuck=chuck;
+const bit=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,1.9,24),S());bit.rotation.z=Math.PI/2;bit.position.set(1.65,0,0);mo.add(bit);
+const sp=new THREE.Group();for(let i=0;i<14;i++){const s=new THREE.Mesh(new THREE.BoxGeometry(.06,.16,.02),S());s.position.set(.9+i*.12,0,0);s.rotation.x=i*.7;sp.add(s)}mo.add(sp);
+// wall scene
+const wall=new THREE.Group();sc.add(wall);
+const gray=new THREE.MeshStandardMaterial({color:0xb9b9b4,roughness:.9});
+const w1=new THREE.Mesh(new THREE.BoxGeometry(3.6,4.4,.3),gray);wall.add(w1);
+const brick=new THREE.Mesh(new THREE.BoxGeometry(.7,4.4,.32),new THREE.MeshStandardMaterial({color:0xc98a7c,roughness:.9}));brick.position.set(-1.45,0,.01);wall.add(brick);
+const out=new THREE.Mesh(new THREE.BoxGeometry(.55,.75,.08),new THREE.MeshStandardMaterial({color:0xf0f0ec}));out.position.set(-.7,.2,.19);wall.add(out);
+for(const y of [.35,0]){const s=new THREE.Mesh(new THREE.BoxGeometry(.22,.22,.02),D(0x555));s.position.set(-.7,y+.05,.24);wall.add(s)}
+const mk=new THREE.Mesh(new THREE.SphereGeometry(.09,16,16),new THREE.MeshBasicMaterial({color:0x22c55e}));mk.position.set(.95,.2,.2);wall.add(mk);
+const ln=new THREE.Mesh(new THREE.BoxGeometry(1.65,.03,.03),new THREE.MeshBasicMaterial({color:0x22c55e}));ln.position.set(.12,.2,.2);wall.add(ln);
+wall.position.set(1.4,.5,-1);
+// concrete pillar
+const cn=document.createElement('canvas');cn.width=cn.height=256;const cx=cn.getContext('2d');cx.fillStyle='#bdbdb8';cx.fillRect(0,0,256,256);
+for(let i=0;i<1400;i++){cx.fillStyle=`rgba(${60+Math.random()*120|0},${60+Math.random()*110|0},${50+Math.random()*100|0},.5)`;cx.fillRect(Math.random()*256,Math.random()*256,1+Math.random()*3,1+Math.random()*3)}
+const ctx=new THREE.CanvasTexture(cn);
+const pil=new THREE.Group();sc.add(pil);
+pil.add(new THREE.Mesh(new THREE.BoxGeometry(1.7,4.2,1.2),new THREE.MeshStandardMaterial({map:ctx,roughness:.95})));
+const cab=new THREE.Mesh(new THREE.BoxGeometry(.12,4.22,.12),new THREE.MeshStandardMaterial({color:0x8a4b24}));cab.position.set(0.05,0,.55);pil.add(cab);
+pil.position.set(1.7,.3,-1.5);
+const hp={1:[1.9,.9,.5],2:[1.25,1.05,.5],3:[-.25,1.35,.2],4:[.1,.25,.55],5:[.15,-.1,.5],6:[-.55,-1.95,.6]};
+const hot=document.getElementById('hot');const hs={};
+for(const i of [1,2,3,4,5,6]){const e=document.createElement('div');e.className='h';e.textContent=i;hot.appendChild(e);hs[i]=e}
+const ITEMS=[['Mandril','Aquí entra la broca. Gira con la mano hasta que haga clic.'],['Anillo de modo','Del 1 al 15 es para atornillar; después viene la broca (taladro) y el martillo.'],['Velocidad 1 · 2','Atrás: lento y con fuerza, para tornillos. Adelante: rápido, para huecos.'],['Botón de giro','Derecha: atornilla y perfora. Izquierda: saca tornillos.'],['Gatillo','Más a fondo, más rápido. Empieza despacio.'],['Batería 20 V','Entra deslizando hasta el clic. Cárgala antes de empezar.']];
+const panel=document.getElementById('panel');
+const glowMap={1:'chuck',2:'ring',3:'speed',4:'fwd',5:'trigger',6:'battery'};
 const ease=x=>x<0?0:x>1?1:x*x*(3-2*x);
-function secAt(t){let i=0;for(let j=0;j<SEC.length;j++)if(t>=SEC[j].t)i=j;return i}
-function camState(t){const i=secAt(t),a=SEC[Math.max(0,i-1)],b=SEC[i];const k=i===0?1:ease((t-b.t)/0.9);const L=(p)=>a[p]+(b[p]-a[p])*k;return{rot:L('rot')+t*0.05,pitch:L('pitch'),dist:L('dist')*1.38,tx:L('tx'),ty:L('ty')}}
-let spinAcc=0,lastT=-1;
-const el=id=>document.getElementById(id);
+// timeline
+const T0=[0,14.4],T1=[14.4,26],T2=[26,38.0];
+const END=38;
+const CUR=[[0,300,420],[2.2,330,300],[3.6,372,300],[5.4,160,140],[7.8,200,150],[9.6,330,260],[11.6,330,410],[14,300,70],[14.8,300,20],[17,150,330],[21,330,200],[25,330,300],[25.9,278,20],[27.5,330,160],[29,350,150],[30,330,125],[31.5,350,135],[34,330,200],[38,330,300]];
+const WORDS="mira esta app. una IA la construyó para enseñarme a usar el taladro. primero, el mandril, aquí entra la broca. luego, el anillo de modo, y la velocidad uno o dos. el botón de giro, y el gatillo: empieza despacio. y la batería de veinte voltios. después, antes de hacer un hueco, mide, marca y revisa qué hay detrás de la pared. cables, tuberías, nada de eso. y según la pared, ladrillo, concreto o madera, cambia la broca y el modo. sígueme y aprende una herramienta nueva cada semana.".split(' ');
+const ANCH=[[0,3.6,0,9],[3.6,14.4,9,32],[14.4,26,32,52],[26,34,52,74],[34,37.6,74,WORDS.length]];
+const WT=[];for(const [a,b,i0,i1] of ANCH){const n=i1-i0;for(let i=0;i<n;i++)WT.push([a+(b-a)*i/n,a+(b-a)*(i+1)/n,WORDS[i0+i]])}
+function tab(t){return t<T1[0]?0:t<T2[0]?1:2}
+function html0(act){return `<div class="k">FASE 0 · CONSEJO</div><h2>TU TALADRO,<br>PARTE POR PARTE</h2><div class="sub">Gira con el dedo. Toca un número para ver qué hace cada parte.</div>
+<div class="box">Lo más importante: el anillo de adelante. Ahí eliges qué vas a hacer. Pruébalo:</div>
+<div class="seg"><div>Atornillar</div><div class="on">Taladrar</div><div>Martillo</div></div>
+`+ITEMS.map((x,i)=>`<div class="it${act===i+1?' on':''}"><i>${i+1}</i><div><b>${x[0]}</b><span>${x[1]}</span></div></div>`).join('')}
+function html1(t){const u=t-T1[0];return `<div class="k">PASO 2 · ANTES DE EMPEZAR</div><h2>UN HUECO<br>CON CHAZO</h2><div class="sub">Mide, marca y revisa. En ese orden.</div>
+<div class="box"><b>Antes de empezar</b><br>· Marca el punto con lápiz.<br>· Mide desde el enchufe: aquí 30 cm.<br>· Si hay cables o tuberías cerca, no perfores.</div>
+${u>5?'<div class="box red"><b>Nunca taladres</b><br>justo arriba o al lado de un enchufe o interruptor: ahí suben los cables.</div>':''}
+${u>8?'<div class="box">Taladra despacio y saca la broca de vez en cuando para que salga el polvo.</div>':''}`}
+function html2(t){const u=t-T2[0];const sel=u<3?0:u<6?1:2;const names=['Ladrillo','Concreto','Madera','Drywall'];
+const info=[['Modo','Taladro'],['Velocidad','2'],['Broca','Para ladrillo']],info2=[['Modo','Martillo'],['Velocidad','2'],['Broca','Para concreto']],info3=[['Modo','Taladro'],['Velocidad','2'],['Broca','Para madera']];
+const inf=[info,info2,info3][sel];
+return `<div class="k">QUÉ HACER SEGÚN LA PARED</div><h2>SEGÚN LA PARED</h2><div class="sub">Lo que viste en las fotos</div>
+<div class="chips">${names.map((n,i)=>`<div class="${i===sel?'on':''}">${n}</div>`).join('')}</div>
+${inf.map(r=>`<div class="row"><s>${r[0].toUpperCase()}</s><b>${r[1]}</b></div>`).join('')}
+<div class="box red"><b>Nunca taladres</b><br>cerca de cables, duchas y tubos de agua. Usa un detector antes.</div>`}
+let lastKey='';
 window.setTime=function(t){
- const i=secAt(t),s=SEC[i],c=camState(t);
- const intro=t<3.2;
- drill.rotation.y=0;
- cam.position.set(c.tx+Math.sin(c.rot)*c.dist*Math.cos(c.pitch),c.ty+Math.sin(c.pitch)*c.dist,Math.cos(c.rot)*c.dist*Math.cos(c.pitch));
- cam.lookAt(c.tx,c.ty,0);
- // spin: trigger section speeds up in a pulse
- let sp=0;if(s.k===4){const u=t-s.t;sp=u<1.2?0:Math.min(1,(u-1.2)/1.5)*(0.5+0.5*Math.sin(u*1.7));sp=Math.max(sp,u>2?0.25+0.75*Math.abs(Math.sin(u*0.9)):0)}
- if(s.k===0&&t<3.2)sp=0.15;
- spinAcc=0;for(let u=0;u<t;u+=1/24){const j=secAt(u);const ss=SEC[j];let v=0;if(ss.k===4){const w=u-ss.t;v=w<1.2?0:Math.min(1,(w-1.2)/1.5)*(0.5+0.5*Math.sin(w*1.7));v=Math.max(v,w>2?0.25+0.75*Math.abs(Math.sin(w*0.9)):0)}if(j===0&&u<3.2)v=0.15;spinAcc+=v*0.9}
- for(const m of spin)m.rotation.x=(m===chuck||m===bit)?spinAcc:spinAcc;
- // glow on active part
- const glow={1:['chuck'],2:['speed'],3:['ring'],4:['trigger'],5:['battery']};
- const pulse=0.35+0.25*Math.sin(t*6);
- for(const n in parts){const m=parts[n];if(m.material&&m.material.emissive)m.material.emissive.setRGB(0,0,0)}
- if(glow[s.k])for(const n of glow[s.k])parts[n].material.emissive.setRGB(pulse*0.9,pulse*0.6,0);
- drill.position.y=Math.sin(t*1.4)*0.04;
- renderer.render(scene,cam);
+ const tb=tab(t);for(let i=0;i<3;i++)document.getElementById('t'+i).className='tab'+(i===tb?' on':'');
+ // active item in tab0
+ let act=0;if(tb===0&&t>=3.6)act=Math.min(6,1+Math.floor((t-3.6)/1.65));
+ const key=tb+'|'+act+'|'+(tb===1?Math.floor((t-T1[0])/1):'')+(tb===2?Math.floor((t-T2[0])/1):'');
+ if(key!==lastKey){lastKey=key;panel.innerHTML=tb===0?html0(act):tb===1?html1(t):html2(t)}
+ // visibility
+ drill.visible=tb===0||tb===1||tb===2;wall.visible=tb===1;pil.visible=tb===2;
+ // drill transform per tab
+ for(const n in P)if(P[n].material&&P[n].material.emissive)P[n].material.emissive.setRGB(0,0,0);
+ let pulse=.35+.25*Math.sin(t*6);
+ if(tb===0&&act&&P[glowMap[act]])P[glowMap[act]].material.emissive.setRGB(pulse*.9,pulse*.6,0);
+ if(tb===0){drill.scale.setScalar(1);drill.position.set(0,Math.sin(t*1.2)*.04,0);drill.rotation.set(0,0,0);
+  const rot=.5+Math.sin(t*.35)*.5+(act?[0,.0,.1,.3,.5,.7,.9][act]*.5:0);const d=11.5;
+  cam.position.set(.4+Math.sin(rot)*d,.7+1.2,Math.cos(rot)*d);cam.lookAt(.2,-.3,0)}
+ if(tb===1){drill.scale.setScalar(.55);drill.position.set(-1.7,-1.1,1.2);drill.rotation.set(0,.5,0);cam.position.set(1.2,1.2,12.5);cam.lookAt(.6,.2,0)}
+ if(tb===2){drill.scale.setScalar(.6);drill.position.set(-1.9,-.6,1);drill.rotation.set(0,.6,0);cam.position.set(1.4,.9,12.5+Math.sin(t*.4)*.3);cam.lookAt(.4,.1,0);pil.rotation.y=-.35+Math.sin(t*.6)*.12}
+ // spin
+ let spin=0;if(tb===0&&act>=5)spin=(t-3.6-4*1.65)*3;sp.rotation.x=spin;chuck.rotation.x=spin;
+ R.render(sc,cam);
  // hotspots
- for(const k of [1,2,3,4,5]){const v=hp[k].clone();drill.localToWorld(v);v.project(cam);const x=(v.x*0.5+0.5)*W,y=(-v.y*0.5+0.5)*H;const e=hs[k],l=labs[k];e.style.left=x+'px';e.style.top=y+'px';const on=s.k===k;e.className='h'+(on||s.k===0?'':' off');e.style.opacity=(t<0.4?0:undefined);const pu=on?1+0.12*Math.sin(t*7):1;e.style.transform='scale('+(on?pu:(s.k===0?1:0.8))+')';l.style.display=on?'block':'none';l.style.left=(x+34)+'px';l.style.top=(y-18)+'px'}
- // panel
- const showPanel=!!s.kick&&!s.cta;
- el('panel').style.display=showPanel?'block':'none';
- el('pk').textContent=s.kick||'';el('pt').textContent=s.title||'';el('pp').textContent=s.body||'';
- el('warn').style.display=s.warn?'flex':'none';el('wt').textContent=s.warn||'';
- // tag (red label like original)
- const tg=el('tag');tg.style.display=(t<3.2)?'block':'none';tg.innerHTML='Aprende a usar tu taladro<br>en 40 segundos';
- // hook
- const hk=el('hook');hk.style.display=(t<3.2)?'flex':'none';hk.innerHTML='';
- if(t<3.2){hk.style.justifyContent='flex-start';hk.style.paddingTop='360px';const a=ease(t/0.4);hk.innerHTML='<h1 style="opacity:'+a+';transform:translateY('+((1-a)*30)+'px)">¿Sabes usar<br>un <em>taladro</em><br>de verdad?</h1>'}
- // cta
- const ct=el('cta');ct.style.display=s.cta?'flex':'none';if(s.cta){const a=ease((t-34)/0.5);ct.style.opacity=a;ct.innerHTML='<h1>Una <em>herramienta</em><br>nueva cada semana</h1><p>Sígueme y aprende a usarlas bien</p><p style="color:#f5b800;font-weight:800;font-size:40px">@TuCanal</p>'}
- // captions word by word
- let w='';for(const [a,b,x] of WT){if(t>=a&&t<b){w=x.replace(/[¿?,.:]/g,'');break}}
- el('cap').textContent=w;el('cap').style.top=(s.cta?1040:770)+'px';
- if(t>=END-0.4){document.body.style.opacity=Math.max(0,(END-t)/0.4)}else document.body.style.opacity=1;
+ for(const i of [1,2,3,4,5,6]){const e=hs[i];if(tb!==0){e.style.display='none';continue}e.style.display='flex';
+  const v=new THREE.Vector3(...hp[i]);drill.localToWorld(v);v.project(cam);e.style.left=((v.x*.5+.5)*W)+'px';e.style.top=((-v.y*.5+.5)*H)+'px';
+  const on=act===i;e.style.transform='scale('+(on?1.5+.15*Math.sin(t*7):1)+')';e.style.opacity=(act&&!on)?.55:1}
+ // cursor
+ let a=CUR[0],b=CUR[CUR.length-1];for(let j=0;j<CUR.length-1;j++)if(t>=CUR[j][0]&&t<CUR[j+1][0]){a=CUR[j];b=CUR[j+1];break}
+ const u=ease((t-a[0])/Math.max(.01,b[0]-a[0]));const cu=document.getElementById('cur');cu.style.left=(a[1]+(b[1]-a[1])*u)+'px';cu.style.top=(a[2]+(b[2]-a[2])*u)+'px';
+ // tag + captions
+ const tg=document.getElementById('tag');tg.style.display=t<3.6?'block':'none';tg.innerHTML='Una IA me está enseñando<br>a usar el taladro';
+ let w='';for(const [x,y,z] of WT){if(t>=x&&t<y){w=z.replace(/[¿?,.:]/g,'');break}}
+ document.getElementById('cap').textContent=w;
+ document.body.style.opacity=t>END-.4?Math.max(0,(END-t)/.4):1;
 };
 window.READY=true;window.setTime(0);
 </script></body></html>

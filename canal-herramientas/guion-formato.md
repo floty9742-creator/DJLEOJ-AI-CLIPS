@@ -18,3 +18,10 @@
 - Gancho: "Le pedí a una IA que me enseñara a usar un taladro... y mira lo que construyó."
 - Entre partes: tu reacción o consejo propio, 5-10 s cada una.
 - Cierre: "Dime qué herramienta quieres que explique la próxima."
+
+## Versión pantalla dividida (igual que el clip de referencia)
+El clip original es una pantalla dividida 720x1280: **arriba** la app (3D a la izquierda, panel a la derecha), **abajo** el presentador, y los subtítulos grandes en la línea del medio.
+- `short-taladro-pantalla-dividida.mp4`: ejemplo completo (abajo hay un marcador "TU CÁMARA AQUÍ").
+- `pantalla-app.mp4`: solo la mitad de arriba (720x640), sin subtítulos, para componer.
+- `guion-subtitulos.srt`: texto y tiempos de ejemplo. Cámbialo por lo que digas tú.
+- `componer.sh tu-camara.mp4`: pone tu cámara abajo y los subtítulos en el medio.
